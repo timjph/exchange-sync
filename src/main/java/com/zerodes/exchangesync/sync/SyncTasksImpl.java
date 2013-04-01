@@ -31,8 +31,14 @@ public class SyncTasksImpl {
 		Collection<TaskDto> otherTasks = otherSource.getAllTasks();
 		Collection<TaskDto> exchangeTasks = exchangeSource.getAllTasks();
 		Map<String, TaskDto> otherTasksMap = generateExchangeIdMap(otherTasks);
+		Map<String, TaskDto> exchangeTasksMap = generateExchangeIdMap(exchangeTasks);
 		for (TaskDto exchangeTask : exchangeTasks) {
-			results.add(generatePairForExchangeTask(otherTasksMap, exchangeTask));
+			TaskDto otherTask = otherTasksMap.get(exchangeTask.getExchangeId());
+			results.add(new Pair<TaskDto, TaskDto>(exchangeTask, otherTask));
+		}
+		for (TaskDto otherTask : otherTasks) {
+			TaskDto exchangeTask = exchangeTasksMap.get(otherTask.getExchangeId());
+			results.add(new Pair<TaskDto, TaskDto>(exchangeTask, otherTask));
 		}
 		return results;
 	}
@@ -45,13 +51,24 @@ public class SyncTasksImpl {
 	 */
 	public void sync(final TaskDto exchangeTask, final TaskDto otherTask, final StatisticsCollector stats) {
 		if (exchangeTask != null && !exchangeTask.isCompleted() && otherTask == null) {
+			// Flagged email exists, but RTM task does not
 			try {
 				otherSource.addTask(exchangeTask);
 				stats.taskAdded();
 			} catch (Exception e) {
 				LOG.error("Problem adding task to remote data source", e);
 			}
+		} else if (otherTask != null && !otherTask.isCompleted() && otherTask.getExchangeId() != null && exchangeTask == null) {
+			// RTM task exists, but flagged email does not
+			otherTask.setCompleted(true);
+			try {
+				otherSource.updateCompletedFlag(otherTask);
+				stats.taskUpdated();
+			} catch (Exception e) {
+				LOG.error("Problem updating task in remote data source", e);
+			}
 		} else if (exchangeTask != null && otherTask != null) {
+			// Both RTM task and flagged email exist
 			if (exchangeTask.getLastModified().isAfter(otherTask.getLastModified())) {
 				exchangeTask.copyTo(otherTask);
 				// Exchange task has a more recent modified date, so modify other task
@@ -98,10 +115,5 @@ public class SyncTasksImpl {
 			results.put(task.getExchangeId(), task);
 		}
 		return results;
-	}
-
-	public Pair<TaskDto, TaskDto> generatePairForExchangeTask(Map<String, TaskDto> otherTaskIdMap, TaskDto exchangeTask) {
-		TaskDto otherTask = otherTaskIdMap.get(exchangeTask.getExchangeId());
-		return new Pair<TaskDto, TaskDto>(exchangeTask, otherTask);
 	}
 }
