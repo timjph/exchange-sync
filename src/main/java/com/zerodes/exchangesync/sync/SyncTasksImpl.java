@@ -70,9 +70,9 @@ public class SyncTasksImpl {
 		} else if (exchangeTask != null && otherTask != null) {
 			// Both RTM task and flagged email exist
 			if (exchangeTask.getLastModified().isAfter(otherTask.getLastModified())) {
-				exchangeTask.copyTo(otherTask);
 				// Exchange task has a more recent modified date, so modify other task
 				if (exchangeTask.isCompleted() != otherTask.isCompleted()) {
+					otherTask.setCompleted(exchangeTask.isCompleted());
 					try {
 						otherSource.updateCompletedFlag(otherTask);
 						stats.taskUpdated();
@@ -81,6 +81,7 @@ public class SyncTasksImpl {
 					}
 				}
 				if (!ObjectUtils.equals(exchangeTask.getDueDate(), otherTask.getDueDate())) {
+					otherTask.setDueDate(exchangeTask.getDueDate());
 					try {
 						otherSource.updateDueDate(otherTask);
 						stats.taskUpdated();
