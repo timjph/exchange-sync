@@ -88,7 +88,7 @@ public class SettingsImpl implements Settings, ExchangeSettings {
 
 	@Override
 	public String getExchangeVersion() {
-	    return userSettings.getProperty("exchangeVersion");
+		return userSettings.getProperty("exchangeVersion", "Exchange2010_SP1");
 	}
 
 	@Override
