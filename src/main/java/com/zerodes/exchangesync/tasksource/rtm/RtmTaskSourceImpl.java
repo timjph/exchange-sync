@@ -21,6 +21,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -79,7 +80,6 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	@Override
 	public void addTask(TaskDto task) throws Exception {
-		String timelineId;
 		// Add email tag
 		task.addTag("email");
 
@@ -95,7 +95,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 		originalSubjectNote.setBody(task.getName());
 		task.addNote(originalSubjectNote);
 
-		timelineId = createTimeline();
+		String timelineId = createTimeline();
 		addTask(timelineId, defaultRtmListId, task);
 		LOG.debug("Added RTM task " + task.getName());
 	}
@@ -484,8 +484,8 @@ public class RtmTaskSourceImpl implements TaskSource {
 	}
 	
 	private String convertJodaDateTimeToString(DateTime theDate) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dateFormat.format(theDate.toDate()) + "T23:00:00Z";
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+		return fmt.print(theDate) + "T23:59:59Z";
 	}
 
 	private DateTime convertStringToJodaDateTime(String theDate) {
