@@ -2,4 +2,8 @@
 .classpath
 .settings
 internal.properties
-target
+target/
+
+# IntelliJ files:
+.idea/
+*.iml
