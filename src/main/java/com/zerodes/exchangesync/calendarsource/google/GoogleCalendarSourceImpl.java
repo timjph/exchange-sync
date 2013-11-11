@@ -126,6 +126,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		result.setDescription(event.getDescription());
 		result.setStart(convertToJodaDateTime(event.getStart()));
 		result.setEnd(convertToJodaDateTime(event.getEnd()));
+		if (event.getEnd().getDateTime() != null) {
+			result.setAllDay(event.getEnd().getDateTime().isDateOnly());
+		}
 		result.setLocation(event.getLocation());
 		if (event.getOrganizer() != null) {
 			final PersonDto person = new PersonDto();
@@ -159,8 +162,8 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 			final AppointmentDto appointmentDto, final Event event) {
 		event.setSummary(appointmentDto.getSummary());
 		event.setDescription(appointmentDto.getDescription());
-		event.setStart(convertToEventDateTime(appointmentDto.getStart()));
-		event.setEnd(convertToEventDateTime(appointmentDto.getEnd()));
+		event.setStart(convertToEventDateTime(appointmentDto.getStart(), appointmentDto.isAllDay()));
+		event.setEnd(convertToEventDateTime(appointmentDto.getEnd(), appointmentDto.isAllDay()));
 		event.setLocation(appointmentDto.getLocation());
 		if (appointmentDto.getOrganizer() != null && appointmentDto.getOrganizer().getEmail() != null) {
 			final Organizer organizer = new Organizer();
@@ -237,9 +240,13 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return new DateTime(date.getMillis());
 	}
 
-	private EventDateTime convertToEventDateTime(final org.joda.time.DateTime date) {
+	private EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay) {
 		final EventDateTime result = new EventDateTime();
-		result.setDateTime(convertToDateTime(date));
+		if (isAllDay) {
+			result.setDate(convertToDateTime(date));
+		} else {
+			result.setDateTime(convertToDateTime(date));
+		}
 		result.setTimeZone("UTC");
 		return result;
 	}

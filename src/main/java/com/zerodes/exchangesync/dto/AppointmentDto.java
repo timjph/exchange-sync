@@ -13,6 +13,7 @@ public class AppointmentDto {
 	private String description;
 	private DateTime start;
 	private DateTime end;
+	private boolean allDay;
 	private String location;
 	private PersonDto organizer;
 	private Set<PersonDto> attendees;
@@ -68,6 +69,14 @@ public class AppointmentDto {
 		return end;
 	}
 	
+	public boolean isAllDay() {
+		return allDay;
+	}
+
+	public void setAllDay(boolean allDay) {
+		this.allDay = allDay;
+	}
+
 	public void setLocation(String location) {
 		this.location = location;
 	}

@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import microsoft.exchange.webservices.data.Appointment;
+import microsoft.exchange.webservices.data.AppointmentType;
 import microsoft.exchange.webservices.data.Attendee;
 import microsoft.exchange.webservices.data.BasePropertySet;
 import microsoft.exchange.webservices.data.BodyType;
@@ -38,6 +39,7 @@ import microsoft.exchange.webservices.data.MeetingRequest;
 import microsoft.exchange.webservices.data.MessageBody;
 import microsoft.exchange.webservices.data.PropertySet;
 import microsoft.exchange.webservices.data.Recurrence;
+import microsoft.exchange.webservices.data.RecurringAppointmentMasterId;
 import microsoft.exchange.webservices.data.SearchFilter;
 import microsoft.exchange.webservices.data.SearchFilter.SearchFilterCollection;
 import microsoft.exchange.webservices.data.ServiceLocalException;
@@ -120,11 +122,12 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 	@Override
 	public Set<TaskDto> getAllTasks() throws Exception {
+		// Return a task for each flagged email
 		final Set<TaskDto> results = new HashSet<TaskDto>();
 		// Take a look at http://blogs.planetsoftware.com.au/paul/archive/2010/05/20/exchange-web-services-ews-managed-api-ndash-part-2.aspx
 		final SearchFilterCollection searchFilterCollection = new SearchFilterCollection(LogicalOperator.Or);
-		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "1"));
-		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "2"));
+		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "1")); // Flagged complete
+		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "2")); // Flagged
 		final ItemView itemView = new ItemView(MAX_RESULTS);
 		itemView.setPropertySet(createEmailPropertySet());
 		final FindItemsResults<Item> items = getAllItemsFolder().findItems(searchFilterCollection, itemView);
@@ -185,6 +188,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		if (email.getRoutingType().equals("SMTP")) {
 			person.setEmail(email.getAddress());
 		}
+		person.setOptional(optional);
 		return person;
 	}
 
@@ -200,6 +204,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		}
 		appointmentDto.setStart(convertToJodaDateTime(appointment.getStart()));
 		appointmentDto.setEnd(convertToJodaDateTime(appointment.getEnd()));
+		appointmentDto.setAllDay(appointment.getIsAllDayEvent());
 		appointmentDto.setLocation(appointment.getLocation());
 		if (appointment.getOrganizer() != null) {
 			appointmentDto.setOrganizer(convertToPersonDto(appointment.getOrganizer(), false));
@@ -244,6 +249,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		}
 		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart()));
 		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd()));
+		appointmentDto.setAllDay(meeting.getIsAllDayEvent());
 		appointmentDto.setLocation(meeting.getLocation());
 		if (meeting.getOrganizer() != null) {
 			appointmentDto.setOrganizer(convertToPersonDto(meeting.getOrganizer(), false));
@@ -363,16 +369,26 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 	@Override
 	public Collection<AppointmentDto> getAllAppointments() throws Exception {
+		// Return a task for each calendar item
 		final Set<AppointmentDto> results = new HashSet<AppointmentDto>();
 		final DateTime now = new DateTime();
-		final DateTime minus6Months = now.minusMonths(6);
-		final DateTime plus6Months = now.plusMonths(6);
-		final CalendarView calendarView = new CalendarView(minus6Months.toDate(), plus6Months.toDate(), MAX_RESULTS);
+		final DateTime startDate = now.minusMonths(1);
+		final DateTime endDate = now.plusMonths(6);
+		final CalendarView calendarView = new CalendarView(startDate.toDate(), endDate.toDate(), MAX_RESULTS);
 		calendarView.setPropertySet(createIdOnlyPropertySet());
 		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar, calendarView);
 		service.loadPropertiesForItems(appointments, createCalendarPropertySet());
 		for (final Appointment appointment : appointments.getItems()) {
 			results.add(convertToAppointmentDto(appointment));
+			// Due to a bug in the EWS API, the code below throws an exception, so we can't handle recurring
+			// appointments properly.
+//			if (appointment.getAppointmentType() == AppointmentType.Occurrence) {
+//				RecurringAppointmentMasterId masterId = new RecurringAppointmentMasterId(appointment.getId().getUniqueId());
+//				Appointment masterAppointment = Appointment.bind(service, masterId, createCalendarPropertySet());
+//				results.add(convertToAppointmentDto(masterAppointment));
+//			} else if (appointment.getAppointmentType() == AppointmentType.Single) {
+//				results.add(convertToAppointmentDto(appointment));
+//			}
 		}
 		return results;
 	}
