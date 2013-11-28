@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,12 @@ public class SyncCalendarsImpl {
 
 	protected Set<Pair<AppointmentDto, AppointmentDto>> generatePairs() throws Exception {
 		Set<Pair<AppointmentDto, AppointmentDto>> results = new HashSet<Pair<AppointmentDto, AppointmentDto>>();
-		Collection<AppointmentDto> otherAppointments = otherSource.getAllAppointments();
-		Collection<AppointmentDto> exchangeAppointments = exchangeSource.getAllAppointments();
+		// Set time frame to one month as temporary workaround for "Calendar usage limits exceeded." issue.
+		final DateTime now = new DateTime();
+		final DateTime startDate = now.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
+		final DateTime endDate = startDate.plusMonths(1);
+		Collection<AppointmentDto> otherAppointments = otherSource.getAllAppointments(startDate, endDate);
+		Collection<AppointmentDto> exchangeAppointments = exchangeSource.getAllAppointments(startDate, endDate);
 		Map<String, AppointmentDto> otherAppointmentsMap = generateExchangeIdMap(otherAppointments);
 		Map<String, AppointmentDto> exchangeAppointmentsMap = generateExchangeIdMap(exchangeAppointments);
 		for (AppointmentDto exchangeAppointment : exchangeAppointments) {

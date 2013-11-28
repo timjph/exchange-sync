@@ -368,12 +368,10 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	}
 
 	@Override
-	public Collection<AppointmentDto> getAllAppointments() throws Exception {
+	public Collection<AppointmentDto> getAllAppointments(final DateTime startDate, final DateTime endDate)
+			throws Exception {
 		// Return a task for each calendar item
 		final Set<AppointmentDto> results = new HashSet<AppointmentDto>();
-		final DateTime now = new DateTime();
-		final DateTime startDate = now.minusMonths(1);
-		final DateTime endDate = now.plusMonths(6);
 		final CalendarView calendarView = new CalendarView(startDate.toDate(), endDate.toDate(), MAX_RESULTS);
 		calendarView.setPropertySet(createIdOnlyPropertySet());
 		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar, calendarView);
@@ -399,12 +397,12 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	}
 
 	@Override
-	public void updateAppointment(AppointmentDto appointment) {
+	public void updateAppointment(final AppointmentDto appointment) {
 		throw new UnsupportedOperationException("Unable to update appointments in Exchange");
 	}
 
 	@Override
-	public void deleteAppointment(AppointmentDto appointment) {
+	public void deleteAppointment(final AppointmentDto appointment) {
 		throw new UnsupportedOperationException("Unable to delete appointments in Exchange");
 	}
 }

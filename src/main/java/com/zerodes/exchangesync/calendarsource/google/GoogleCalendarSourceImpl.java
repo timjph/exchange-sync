@@ -25,6 +25,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -53,13 +54,13 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 
 	private final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	private final JsonFactory JSON_FACTORY = new JacksonFactory();
-	private com.google.api.services.calendar.Calendar client;
+	private Calendar client;
 	private String calendarId;
 
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
 		LOG.info("Connecting to Google Calendar...");
 		Credential credential = authorize();
-		client = new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+		client = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
 			.setApplicationName("Exchange Sync/1.0")
 			.build();
 		calendarId = getCalendarId(settings.getUserSetting(USER_SETTING_CALENDAR_NAME));
@@ -94,7 +95,8 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	}
 
 	@Override
-	public Collection<AppointmentDto> getAllAppointments() throws IOException {
+	public Collection<AppointmentDto> getAllAppointments(final org.joda.time.DateTime startDate,
+			final org.joda.time.DateTime endDate) throws IOException {
 		final Collection<AppointmentDto> results = new HashSet<AppointmentDto>();
 		int page = 1;
 		LOG.info("Retrieving Google Calendar events page " + page);
@@ -102,7 +104,10 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		while (true) {
 			if (feed.getItems() != null) {
 				for (final Event event : feed.getItems()) {
-					results.add(convertToAppointmentDto(event));
+					org.joda.time.DateTime eventDate = convertToJodaDateTime(event.getStart());
+					if ((eventDate.isAfter(startDate) || eventDate.isEqual(startDate)) && eventDate.isBefore(endDate)) {
+						results.add(convertToAppointmentDto(event));
+					}
 				}
 			}
 			String pageToken = feed.getNextPageToken();
@@ -158,8 +163,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return result;
 	}
 
-	private void populateEventFromAppointmentDto(
-			final AppointmentDto appointmentDto, final Event event) {
+	private void populateEventFromAppointmentDto(final AppointmentDto appointmentDto, final Event event) {
 		event.setSummary(appointmentDto.getSummary());
 		event.setDescription(appointmentDto.getDescription());
 		event.setStart(convertToEventDateTime(appointmentDto.getStart(), appointmentDto.isAllDay()));
