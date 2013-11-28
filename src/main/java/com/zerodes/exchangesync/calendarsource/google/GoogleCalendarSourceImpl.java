@@ -244,10 +244,14 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return new DateTime(date.getMillis());
 	}
 
+	private DateTime convertToDate(final org.joda.time.DateTime date) {
+		return new DateTime(true, date.getMillis(), null);
+	}
+
 	private EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay) {
 		final EventDateTime result = new EventDateTime();
 		if (isAllDay) {
-			result.setDate(convertToDateTime(date));
+			result.setDate(convertToDate(date));
 		} else {
 			result.setDateTime(convertToDateTime(date));
 		}
@@ -264,6 +268,12 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	}
 
 	private org.joda.time.DateTime convertToJodaDateTime(final EventDateTime googleTime) {
-		return convertToJodaDateTime(googleTime.getDateTime());
+		org.joda.time.DateTime result;
+		if (googleTime.getDateTime() == null) {
+			result = convertToJodaDateTime(googleTime.getDate());
+		} else {
+			result = convertToJodaDateTime(googleTime.getDateTime());
+		}
+		return result;
 	}
 }
