@@ -53,31 +53,20 @@ public class SyncCalendarsImpl {
 	 * @param exchangeCalendarEntry Exchange CalendarEntry (or null if no matching CalendarEntry exists)
 	 * @param otherCalendarEntry CalendarEntry from "other" data source (or null if no matching CalendarEntry exists)
 	 */
-	public void sync(final AppointmentDto exchangeCalendarEntry, final AppointmentDto otherCalendarEntry, final StatisticsCollector stats) {
+	public void sync(final AppointmentDto exchangeCalendarEntry, final AppointmentDto otherCalendarEntry, final StatisticsCollector stats)
+			throws Exception {
 		if (exchangeCalendarEntry != null && otherCalendarEntry == null) {
-			try {
-				otherSource.addAppointment(exchangeCalendarEntry);
-				stats.appointmentAdded();
-			} catch (Exception e) {
-				LOG.error("Problem adding appointment to remote data source", e);
-			}
+			otherSource.addAppointment(exchangeCalendarEntry);
+			stats.appointmentAdded();
 		} else if (exchangeCalendarEntry == null && otherCalendarEntry != null && otherCalendarEntry.getExchangeId() != null) {
-			try {
-				otherSource.deleteAppointment(otherCalendarEntry);
-				stats.appointmentDeleted();
-			} catch (Exception e) {
-				LOG.error("Problem deleting appointment from remote data source", e);
-			}
+			otherSource.deleteAppointment(otherCalendarEntry);
+			stats.appointmentDeleted();
 		} else if (exchangeCalendarEntry != null && otherCalendarEntry != null && !exchangeCalendarEntry.equals(otherCalendarEntry)) {
 			if (exchangeCalendarEntry.getLastModified().isAfter(otherCalendarEntry.getLastModified())) {
 				// Exchange CalendarEntry has a more recent modified date, so modify other CalendarEntry
-				try {
-					exchangeCalendarEntry.copyTo(otherCalendarEntry);
-					otherSource.updateAppointment(otherCalendarEntry);
-					stats.appointmentUpdated();
-				} catch (Exception e) {
-					LOG.error("Problem updating appointment in remote data source", e);
-				}
+				exchangeCalendarEntry.copyTo(otherCalendarEntry);
+				otherSource.updateAppointment(otherCalendarEntry);
+				stats.appointmentUpdated();
 			} else {
 				// Other CalendarEntry has a more recent modified date, so modify Exchange
 			}
@@ -96,7 +85,7 @@ public class SyncCalendarsImpl {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
 		} catch (Exception e) {
-			LOG.error("Problem retrieving appointments - sync aborted", e);
+			LOG.error("Problem synchronizing appointments - sync aborted", e);
 		}
 	}
 

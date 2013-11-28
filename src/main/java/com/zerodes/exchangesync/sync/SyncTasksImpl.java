@@ -49,45 +49,30 @@ public class SyncTasksImpl {
 	 * @param exchangeTask Exchange task (or null if no matching task exists)
 	 * @param otherTask Task from "other" data source (or null if no matching task exists)
 	 */
-	public void sync(final TaskDto exchangeTask, final TaskDto otherTask, final StatisticsCollector stats) {
+	public void sync(final TaskDto exchangeTask, final TaskDto otherTask, final StatisticsCollector stats)
+			throws Exception {
 		if (exchangeTask != null && !exchangeTask.isCompleted() && otherTask == null) {
 			// Flagged email exists, but RTM task does not
-			try {
-				otherSource.addTask(exchangeTask);
-				stats.taskAdded();
-			} catch (Exception e) {
-				LOG.error("Problem adding task to remote data source", e);
-			}
+			otherSource.addTask(exchangeTask);
+			stats.taskAdded();
 		} else if (otherTask != null && !otherTask.isCompleted() && otherTask.getExchangeId() != null && exchangeTask == null) {
 			// RTM task exists, but flagged email does not
 			otherTask.setCompleted(true);
-			try {
-				otherSource.updateCompletedFlag(otherTask);
-				stats.taskUpdated();
-			} catch (Exception e) {
-				LOG.error("Problem updating task in remote data source", e);
-			}
+			otherSource.updateCompletedFlag(otherTask);
+			stats.taskUpdated();
 		} else if (exchangeTask != null && otherTask != null) {
 			// Both RTM task and flagged email exist
 			if (exchangeTask.getLastModified().isAfter(otherTask.getLastModified())) {
 				// Exchange task has a more recent modified date, so modify other task
 				if (exchangeTask.isCompleted() != otherTask.isCompleted()) {
 					otherTask.setCompleted(exchangeTask.isCompleted());
-					try {
-						otherSource.updateCompletedFlag(otherTask);
-						stats.taskUpdated();
-					} catch (Exception e) {
-						LOG.error("Problem updating task on remote data source", e);
-					}
+					otherSource.updateCompletedFlag(otherTask);
+					stats.taskUpdated();
 				}
 				if (!ObjectUtils.equals(exchangeTask.getDueDate(), otherTask.getDueDate())) {
 					otherTask.setDueDate(exchangeTask.getDueDate());
-					try {
-						otherSource.updateDueDate(otherTask);
-						stats.taskUpdated();
-					} catch (Exception e) {
-						LOG.error("Problem updating task on remote data source", e);
-					}
+					otherSource.updateDueDate(otherTask);
+					stats.taskUpdated();
 				}
 			} else {
 				// Other task has a more recent modified date, so modify Exchange
@@ -106,7 +91,7 @@ public class SyncTasksImpl {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
 		} catch (Exception e) {
-			LOG.error("Problem retrieving tasks - sync aborted", e);
+			LOG.error("Problem synchronizing tasks - sync aborted", e);
 		}
 	}
 
