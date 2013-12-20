@@ -171,14 +171,14 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		}
 		final TaskDto task = new TaskDto();
 		task.setExchangeId(email.getId().getUniqueId());
-		task.setLastModified(convertToJodaDateTime(email.getLastModifiedTime()));
+		task.setLastModified(convertToJodaDateTime(email.getLastModifiedTime(), false));
 		task.setName(email.getSubject());
 		if (flagValue == null) {
 			throw new RuntimeException("Found email without follow-up flag!");
 		} else if (flagValue == PR_FLAG_STATUS_FOLLOWUP_COMPLETE) {
 			task.setCompleted(true);
 		}
-		task.setDueDate(convertToJodaDateTime(dueDate));
+		task.setDueDate(convertToJodaDateTime(dueDate, false));
 		return task;
 	}
 	
@@ -195,15 +195,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public AppointmentDto convertToAppointmentDto(final Appointment appointment) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(appointment.getId().getUniqueId());
-		appointmentDto.setLastModified(convertToJodaDateTime(appointment.getLastModifiedTime()));
+		appointmentDto.setLastModified(convertToJodaDateTime(appointment.getLastModifiedTime(), false));
 		appointmentDto.setSummary(appointment.getSubject());
 		try {
 			appointmentDto.setDescription(MessageBody.getStringFromMessageBody(appointment.getBody()));
 		} catch (final Exception e) {
 			LOG.error("Unable to retrieve appointment body from Exchange", e);
 		}
-		appointmentDto.setStart(convertToJodaDateTime(appointment.getStart()));
-		appointmentDto.setEnd(convertToJodaDateTime(appointment.getEnd()));
+		appointmentDto.setStart(convertToJodaDateTime(appointment.getStart(), appointment.getIsAllDayEvent()));
+		appointmentDto.setEnd(convertToJodaDateTime(appointment.getEnd(), appointment.getIsAllDayEvent()));
 		appointmentDto.setAllDay(appointment.getIsAllDayEvent());
 		appointmentDto.setLocation(appointment.getLocation());
 		if (appointment.getOrganizer() != null) {
@@ -240,15 +240,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public AppointmentDto convertToAppointmentDto(final MeetingRequest meeting) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(meeting.getId().getUniqueId());
-		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime()));
+		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime(), false));
 		appointmentDto.setSummary(meeting.getSubject());
 		try {
 			appointmentDto.setDescription(MessageBody.getStringFromMessageBody(meeting.getBody()));
 		} catch (final Exception e) {
 			LOG.error("Unable to retrieve appointment body from Exchange", e);
 		}
-		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart()));
-		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd()));
+		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart(), meeting.getIsAllDayEvent()));
+		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd(), meeting.getIsAllDayEvent()));
 		appointmentDto.setAllDay(meeting.getIsAllDayEvent());
 		appointmentDto.setLocation(meeting.getLocation());
 		if (meeting.getOrganizer() != null) {
@@ -289,7 +289,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	 * @param theDate the date returned from EWS
 	 * @return theDate converted to local time
 	 */
-	private DateTime convertToJodaDateTime(final Date theDate) {
+	private DateTime convertToJodaDateTime(final Date theDate, final boolean isAllDay) {
 		final TimeZone tz = Calendar.getInstance().getTimeZone();
 
 		final long msFromEpochGmt = theDate.getTime();
@@ -299,8 +299,13 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 		// create a new calendar in GMT timezone, set to this date and add the
 		// offset
-		final DateTime newTime = new DateTime(theDate.getTime(), DateTimeZone.UTC);
-		return newTime.plus(offsetFromUTC);
+		DateTime newTime = new DateTime(theDate.getTime(), DateTimeZone.UTC);
+		newTime = newTime.plus(offsetFromUTC);
+		// Return all day appointments as 00:00Z regardless of time zone
+		if (isAllDay) {
+			newTime = newTime.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
+		}
+		return newTime;
 	}
 
 	private PropertySet createIdOnlyPropertySet() {
