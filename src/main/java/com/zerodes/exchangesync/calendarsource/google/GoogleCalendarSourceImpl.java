@@ -104,8 +104,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		while (true) {
 			if (feed.getItems() != null) {
 				for (final Event event : feed.getItems()) {
-					org.joda.time.DateTime eventDate = convertToJodaDateTime(event.getStart());
-					if ((eventDate.isAfter(startDate) || eventDate.isEqual(startDate)) && eventDate.isBefore(endDate)) {
+					org.joda.time.DateTime eventStartDate = convertToJodaDateTime(event.getStart());
+					org.joda.time.DateTime eventEndDate = coalesce(convertToJodaDateTime(event.getEnd()), convertToJodaDateTime(event.getStart()));
+					if ((eventEndDate.isAfter(startDate) || eventEndDate.isEqual(startDate)) && eventStartDate.isBefore(endDate)) {
 						results.add(convertToAppointmentDto(event));
 					}
 				}
@@ -275,5 +276,14 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 			result = convertToJodaDateTime(googleTime.getDateTime());
 		}
 		return result;
+	}
+
+	public static <T> T coalesce(T ...items) {
+		for(T item : items) {
+			if (item != null) {
+				return item;
+			}
+		}
+		return null;
 	}
 }
