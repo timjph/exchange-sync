@@ -21,4 +21,4 @@ Linux Usage Instructions
 8. Copy exchangesync.properties to your home folder: <code>cp exchangesync.properties ~/exchangesync.properties</code>
 9. Compile the application: <code>mvn install</code>
 10. Create a symlink to the application in your home directory: <code>ln -s ~/exchangesync.jar ~/exchange-sync/target/exchangesync-0.0.1-SNAPSHOT-jar-with-dependencies.jar</code>
-11. Add the following line to your /etc/crontab file: <code>*/5 *   * * *   user   java -jar ~/exchangesync.jar > ~/exchangesync.log 2>&1</code> (You will need to change "user" to your username.)
+11. Add the following line to your /etc/crontab file: <code>*/30 *   * * *   user   java -jar ~/exchangesync.jar > ~/exchangesync.log 2>&1</code> (You will need to change "user" to your username.)
