@@ -12,7 +12,7 @@ Linux Usage Instructions
     - Set exchangeDomain, exchangeUsername, exchangePassword to your Microsoft Exchange domain, username, and password.
     - Set rtmListName to the name of the Remember the Milk list that you want to export tasks to.
     - Set googleCalendarName to the name of the Google Calendar that you want to export appointments to. This should match one of the calendar names under the "My Calendars" list on the left-hand side of your Google Calendar view.
-5. Create a symlink to the jar to simplify upgrades: <code>ln -s ~/exchange-sync/exchangesync.jar ~/exchange-sync/exchangesync-1.0.0-SNAPSHOT-jar-with-dependencies.jar</code>
+5. Create a symlink to the jar to simplify upgrades: <code>ln -s ~/exchange-sync/exchangesync-1.0.0-SNAPSHOT-jar-with-dependencies.jar ~/exchange-sync/exchangesync.jar</code>
 6. Add the following line to your /etc/crontab file: <code>*/30 *   * * *   user   java -jar ~/exchange-sync/exchangesync.jar > ~/exchange-sync/exchangesync.log 2>&1</code> (You will need to change "user" to your username.)
 
 Developer Instructions
@@ -30,5 +30,5 @@ Developer Instructions
     - Set googleCalendarName to the name of the Google Calendar that you want to export appointments to. This should match one of the calendar names under the "My Calendars" list on the left-hand side of your Google Calendar view.
 8. Copy exchangesync.properties to your home folder: <code>cp exchangesync.properties ~/exchangesync.properties</code>
 9. Compile the application: <code>mvn install</code>
-10. Create a symlink to the application in your home directory: <code>ln -s ~/exchangesync.jar ~/exchange-sync/target/exchangesync-1.0.0-SNAPSHOT-jar-with-dependencies.jar</code>
+10. Create a symlink to the application in your home directory: <code>ln -s ~/exchange-sync/target/exchangesync-1.0.0-SNAPSHOT-jar-with-dependencies.jar ~/exchangesync.jar</code>
 11. Add the following line to your /etc/crontab file: <code>*/30 *   * * *   user   java -jar ~/exchangesync.jar > ~/exchangesync.log 2>&1</code> (You will need to change "user" to your username.)
