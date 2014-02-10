@@ -25,7 +25,7 @@ public class AppointmentDto {
 		return exchangeId;
 	}
 	
-	public void setExchangeId(String exchangeId) {
+	public void setExchangeId(final String exchangeId) {
 		this.exchangeId = exchangeId;
 	}
 	
@@ -33,11 +33,11 @@ public class AppointmentDto {
 		return lastModified;
 	}
 	
-	public void setLastModified(DateTime lastModified) {
+	public void setLastModified(final DateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 	
-	public void setSummary(String summary) {
+	public void setSummary(final String summary) {
 		this.summary = summary;
 	}
 	
@@ -49,11 +49,11 @@ public class AppointmentDto {
 		return description;
 	}
 	
-	public void setDescription(String name) {
+	public void setDescription(final String name) {
 		this.description = name;
 	}
 	
-	public void setStart(DateTime start) {
+	public void setStart(final DateTime start) {
 		this.start = start;
 	}
 	
@@ -61,7 +61,7 @@ public class AppointmentDto {
 		return start;
 	}
 	
-	public void setEnd(DateTime end) {
+	public void setEnd(final DateTime end) {
 		this.end = end;
 	}
 	
@@ -73,11 +73,11 @@ public class AppointmentDto {
 		return allDay;
 	}
 
-	public void setAllDay(boolean allDay) {
+	public void setAllDay(final boolean allDay) {
 		this.allDay = allDay;
 	}
 
-	public void setLocation(String location) {
+	public void setLocation(final String location) {
 		this.location = location;
 	}
 	public String getLocation() {
@@ -88,7 +88,7 @@ public class AppointmentDto {
 		return organizer;
 	}
 	
-	public void setOrganizer(PersonDto organizer) {
+	public void setOrganizer(final PersonDto organizer) {
 		this.organizer = organizer;
 	}
 	
@@ -96,7 +96,7 @@ public class AppointmentDto {
 		return attendees;
 	}
 	
-	public void setAttendees(Set<PersonDto> attendees) {
+	public void setAttendees(final Set<PersonDto> attendees) {
 		this.attendees = attendees;
 	}
 	
@@ -104,7 +104,7 @@ public class AppointmentDto {
 		return reminderMinutesBeforeStart;
 	}
 	
-	public void setReminderMinutesBeforeStart(Integer reminderMinutesBeforeStart) {
+	public void setReminderMinutesBeforeStart(final Integer reminderMinutesBeforeStart) {
 		this.reminderMinutesBeforeStart = reminderMinutesBeforeStart;
 	}
 	
@@ -112,7 +112,7 @@ public class AppointmentDto {
 		return recurrenceType;
 	}
 	
-	public void setRecurrenceType(RecurrenceType recurrenceType) {
+	public void setRecurrenceType(final RecurrenceType recurrenceType) {
 		this.recurrenceType = recurrenceType;
 	}
 	
@@ -120,11 +120,11 @@ public class AppointmentDto {
 		return recurrenceCount;
 	}
 	
-	public void setRecurrenceCount(Integer recurrenceCount) {
+	public void setRecurrenceCount(final Integer recurrenceCount) {
 		this.recurrenceCount = recurrenceCount;
 	}
 	
-	public void copyTo(AppointmentDto dest) {
+	public void copyTo(final AppointmentDto dest) {
 		dest.exchangeId = exchangeId;
 		dest.lastModified = lastModified;
 		dest.summary = summary;
@@ -156,12 +156,17 @@ public class AppointmentDto {
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		AppointmentDto other = (AppointmentDto) obj;
+		}
+		if (!(obj instanceof AppointmentDto)) {
+			return false;
+		}
+		final AppointmentDto other = (AppointmentDto) obj;
 		return new EqualsBuilder()
 			.append(exchangeId, other.exchangeId)
 			.append(summary, other.summary)

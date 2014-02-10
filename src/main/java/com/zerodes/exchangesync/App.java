@@ -15,8 +15,8 @@ import com.zerodes.exchangesync.tasksource.rtm.RtmTaskSourceImpl;
 public class App {
 	private static final Logger LOG = LoggerFactory.getLogger(App.class);
 	
-	public static void main(String[] args) {
-		SettingsImpl settings = new SettingsImpl();
+	public static void main(final String[] args) {
+		final SettingsImpl settings = new SettingsImpl();
 		
 		try {
 			// Initialize exchange source
@@ -45,7 +45,7 @@ public class App {
 			
 			// Show stats
 			stats.display();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("An unexpected exception occurred", e);
 		} finally {
 			settings.save();

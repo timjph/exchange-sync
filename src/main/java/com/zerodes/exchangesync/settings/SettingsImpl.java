@@ -11,40 +11,36 @@ import java.util.Properties;
 import com.zerodes.exchangesync.ExchangeSettings;
 
 public class SettingsImpl implements Settings, ExchangeSettings {
-	private Properties userSettings;
-	private Properties internalSettings;
+	private final Properties userSettings;
+	private final Properties internalSettings;
 	
 	public SettingsImpl() {
 		userSettings = new Properties();
 		internalSettings = new Properties();
 		try {
-			InputStream userSettingsStream = new FileInputStream(System.getProperty("exchangesync.properties", "exchangesync.properties"));
-			if (userSettingsStream != null) {
-				userSettings.load(userSettingsStream);
-				userSettingsStream.close();
-			}
-		} catch (IOException e) {
+			final InputStream userSettingsStream = new FileInputStream(System.getProperty("exchangesync.properties", "exchangesync.properties"));
+			userSettings.load(userSettingsStream);
+			userSettingsStream.close();
+		} catch (final IOException e) {
 			// Do nothing, just use defaults
 		}
 		try {
-			InputStream internalSettingsStream = new FileInputStream("internal.properties");
-			if (internalSettingsStream != null) {
-				internalSettings.load(internalSettingsStream);
-				internalSettingsStream.close();
-			}
-		} catch (IOException e) {
+			final InputStream internalSettingsStream = new FileInputStream("internal.properties");
+			internalSettings.load(internalSettingsStream);
+			internalSettingsStream.close();
+		} catch (final IOException e) {
 			// Do nothing, just use defaults
 		}
 	}
 	
 	public void save() {
 		try {
-			OutputStream internalSettingsStream = new FileOutputStream("internal.properties");
+			final OutputStream internalSettingsStream = new FileOutputStream("internal.properties");
 			internalSettings.store(internalSettingsStream, null);
 			internalSettingsStream.close();
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			throw new RuntimeException("Unable to save settings.", e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Unable to save settings.", e);
 		}
 	}
@@ -52,18 +48,12 @@ public class SettingsImpl implements Settings, ExchangeSettings {
 
 	@Override
 	public boolean syncTasks() {
-		if ("true".equalsIgnoreCase(userSettings.getProperty("syncTasks"))) {
-			return true;
-		}
-		return false;
+		return "true".equalsIgnoreCase(userSettings.getProperty("syncTasks"));
 	}
 
 	@Override
 	public boolean syncAppointments() {
-		if ("true".equalsIgnoreCase(userSettings.getProperty("syncAppointments"))) {
-			return true;
-		}
-		return false;
+		return "true".equalsIgnoreCase(userSettings.getProperty("syncAppointments"));
 	}
 
 	@Override
@@ -92,17 +82,17 @@ public class SettingsImpl implements Settings, ExchangeSettings {
 	}
 
 	@Override
-	public String getUserSetting(String key) {
+	public String getUserSetting(final String key) {
 		return userSettings.getProperty(key);
 	}
 
 	@Override
-	public String getInternalSetting(String key) {
+	public String getInternalSetting(final String key) {
 		return internalSettings.getProperty(key);
 	}
 
 	@Override
-	public void setInternalSetting(String key, String value) {
+	public void setInternalSetting(final String key, final String value) {
 		if (value == null) {
 			internalSettings.remove(key);
 		} else {

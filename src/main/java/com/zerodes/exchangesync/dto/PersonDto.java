@@ -8,19 +8,19 @@ public class PersonDto {
 	private String email;
 	private boolean optional;
 	
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 	public String getName() {
 		return name;
 	}
-	public void setEmail(String email) {
+	public void setEmail(final String email) {
 		this.email = email;
 	}
 	public String getEmail() {
 		return email;
 	}
-	public void setOptional(boolean optional) {
+	public void setOptional(final boolean optional) {
 		this.optional = optional;
 	}
 	public boolean isOptional() {
@@ -35,12 +35,17 @@ public class PersonDto {
 			.toHashCode();
 	}
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		PersonDto other = (PersonDto) obj;
+		}
+		if (!(obj instanceof PersonDto)) {
+			return false;
+		}
+		final PersonDto other = (PersonDto) obj;
 		return new EqualsBuilder()
 			.append(name, other.name)
 			.append(email, other.email)

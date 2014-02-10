@@ -22,7 +22,7 @@ public class TaskDto {
 		return exchangeId;
 	}
 
-	public void setExchangeId(String exchangeId) {
+	public void setExchangeId(final String exchangeId) {
 		this.exchangeId = exchangeId;
 	}
 	
@@ -30,7 +30,7 @@ public class TaskDto {
 		return lastModified;
 	}
 
-	public void setLastModified(DateTime lastModified) {
+	public void setLastModified(final DateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 
@@ -38,7 +38,7 @@ public class TaskDto {
 		return name;
 	}
 	
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 	
@@ -46,7 +46,7 @@ public class TaskDto {
 		return dueDate;
 	}
 	
-	public void setDueDate(DateTime dueDate) {
+	public void setDueDate(final DateTime dueDate) {
 		this.dueDate = dueDate;
 	}
 	
@@ -54,7 +54,7 @@ public class TaskDto {
 		return priority;
 	}
 	
-	public void setPriority(Byte priority) {
+	public void setPriority(final Byte priority) {
 		this.priority = priority;
 	}
 	
@@ -62,7 +62,7 @@ public class TaskDto {
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(final String url) {
 		this.url = url;
 	}
 
@@ -70,7 +70,7 @@ public class TaskDto {
 		return completed;
 	}
 
-	public void setCompleted(boolean completed) {
+	public void setCompleted(final boolean completed) {
 		this.completed = completed;
 	}
 
@@ -116,12 +116,17 @@ public class TaskDto {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		TaskDto other = (TaskDto) obj;
+		}
+		if (!(obj instanceof TaskDto)) {
+			return false;
+		}
+		final TaskDto other = (TaskDto) obj;
 		return new EqualsBuilder()
 			.append(exchangeId, other.exchangeId)
 			.append(lastModified, other.lastModified)

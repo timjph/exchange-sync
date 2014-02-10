@@ -10,7 +10,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import microsoft.exchange.webservices.data.Appointment;
-import microsoft.exchange.webservices.data.AppointmentType;
 import microsoft.exchange.webservices.data.Attendee;
 import microsoft.exchange.webservices.data.BasePropertySet;
 import microsoft.exchange.webservices.data.BodyType;
@@ -39,7 +38,6 @@ import microsoft.exchange.webservices.data.MeetingRequest;
 import microsoft.exchange.webservices.data.MessageBody;
 import microsoft.exchange.webservices.data.PropertySet;
 import microsoft.exchange.webservices.data.Recurrence;
-import microsoft.exchange.webservices.data.RecurringAppointmentMasterId;
 import microsoft.exchange.webservices.data.SearchFilter;
 import microsoft.exchange.webservices.data.SearchFilter.SearchFilterCollection;
 import microsoft.exchange.webservices.data.ServiceLocalException;
@@ -182,7 +180,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		return task;
 	}
 	
-	public PersonDto convertToPersonDto(final EmailAddress email, boolean optional) {
+	public PersonDto convertToPersonDto(final EmailAddress email, final boolean optional) {
 		final PersonDto person = new PersonDto();
 		person.setName(email.getName());
 		if (email.getRoutingType().equals("SMTP")) {

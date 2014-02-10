@@ -18,17 +18,17 @@ public class NullTaskSourceImpl implements TaskSource {
 	}
 
 	@Override
-	public void addTask(TaskDto task) {
+	public void addTask(final TaskDto task) {
 		LOG.debug("Added task " + task.getName());
 	}
 
 	@Override
-	public void updateDueDate(TaskDto task) {
+	public void updateDueDate(final TaskDto task) {
 		LOG.debug("Updated RTM task due date for " + task.getName());
 	}
 
 	@Override
-	public void updateCompletedFlag(TaskDto task) {
+	public void updateCompletedFlag(final TaskDto task) {
 		if (task.isCompleted()) {
 			LOG.debug("Marked task as completed for " + task.getName());
 		} else {

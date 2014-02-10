@@ -32,12 +32,17 @@ public class NoteDto {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		NoteDto other = (NoteDto) obj;
+		}
+		if (!(obj instanceof NoteDto)) {
+			return false;
+		}
+		final NoteDto other = (NoteDto) obj;
 		return new EqualsBuilder()
 			.append(title, other.title)
 			.append(body, other.body)

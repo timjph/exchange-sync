@@ -8,7 +8,7 @@ public class Pair<L, R> {
 	private final L left;
 	private final R right;
 
-	public Pair(L left, R right) {
+	public Pair(final L left, final R right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -31,12 +31,12 @@ public class Pair<L, R> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (o == null)
 			return false;
 		if (!(o instanceof Pair))
 			return false;
-		Pair other = (Pair) o;
+		final Pair other = (Pair) o;
 		return new EqualsBuilder()
 			.append(left, other.left)
 			.append(right, other.right)

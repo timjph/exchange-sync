@@ -18,26 +18,26 @@ import com.zerodes.exchangesync.tasksource.TaskSource;
 public class SyncTasksImpl {
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTasksImpl.class);
 
-	private TaskSource exchangeSource;
-	private TaskSource otherSource;
+	private final TaskSource exchangeSource;
+	private final TaskSource otherSource;
 
-	public SyncTasksImpl(TaskSource exchangeSource, TaskSource otherSource) {
+	public SyncTasksImpl(final TaskSource exchangeSource, final TaskSource otherSource) {
 		this.exchangeSource = exchangeSource;
 		this.otherSource = otherSource;
 	}
 
 	protected Set<Pair<TaskDto, TaskDto>> generatePairs() throws Exception {
-		Set<Pair<TaskDto, TaskDto>> results = new HashSet<Pair<TaskDto, TaskDto>>();
-		Collection<TaskDto> otherTasks = otherSource.getAllTasks();
-		Collection<TaskDto> exchangeTasks = exchangeSource.getAllTasks();
-		Map<String, TaskDto> otherTasksMap = generateExchangeIdMap(otherTasks);
-		Map<String, TaskDto> exchangeTasksMap = generateExchangeIdMap(exchangeTasks);
-		for (TaskDto exchangeTask : exchangeTasks) {
-			TaskDto otherTask = otherTasksMap.get(exchangeTask.getExchangeId());
+		final Set<Pair<TaskDto, TaskDto>> results = new HashSet<Pair<TaskDto, TaskDto>>();
+		final Collection<TaskDto> otherTasks = otherSource.getAllTasks();
+		final Collection<TaskDto> exchangeTasks = exchangeSource.getAllTasks();
+		final Map<String, TaskDto> otherTasksMap = generateExchangeIdMap(otherTasks);
+		final Map<String, TaskDto> exchangeTasksMap = generateExchangeIdMap(exchangeTasks);
+		for (final TaskDto exchangeTask : exchangeTasks) {
+			final TaskDto otherTask = otherTasksMap.get(exchangeTask.getExchangeId());
 			results.add(new Pair<TaskDto, TaskDto>(exchangeTask, otherTask));
 		}
-		for (TaskDto otherTask : otherTasks) {
-			TaskDto exchangeTask = exchangeTasksMap.get(otherTask.getExchangeId());
+		for (final TaskDto otherTask : otherTasks) {
+			final TaskDto exchangeTask = exchangeTasksMap.get(otherTask.getExchangeId());
 			results.add(new Pair<TaskDto, TaskDto>(exchangeTask, otherTask));
 		}
 		return results;
@@ -85,19 +85,19 @@ public class SyncTasksImpl {
 
 		// Generate matching pairs of tasks
 		try {
-			Set<Pair<TaskDto, TaskDto>> pairs = generatePairs();
+			final Set<Pair<TaskDto, TaskDto>> pairs = generatePairs();
 			// Create/complete/delete as required
-			for (Pair<TaskDto, TaskDto> pair : pairs) {
+			for (final Pair<TaskDto, TaskDto> pair : pairs) {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("Problem synchronizing tasks - sync aborted", e);
 		}
 	}
 
-	public Map<String, TaskDto> generateExchangeIdMap(Collection<TaskDto> tasks) {
-		Map<String, TaskDto> results = new HashMap<String, TaskDto>();
-		for (TaskDto task : tasks) {
+	public Map<String, TaskDto> generateExchangeIdMap(final Collection<TaskDto> tasks) {
+		final Map<String, TaskDto> results = new HashMap<String, TaskDto>();
+		for (final TaskDto task : tasks) {
 			results.put(task.getExchangeId(), task);
 		}
 		return results;

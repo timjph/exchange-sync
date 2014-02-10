@@ -8,7 +8,7 @@ public class GoogleAppointmentDto extends AppointmentDto {
 	public String getGoogleId() {
 		return googleId;
 	}
-	public void setGoogleId(String googleId) {
+	public void setGoogleId(final String googleId) {
 		this.googleId = googleId;
 	}
 }

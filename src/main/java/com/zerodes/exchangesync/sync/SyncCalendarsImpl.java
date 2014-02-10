@@ -18,30 +18,30 @@ import com.zerodes.exchangesync.dto.AppointmentDto;
 public class SyncCalendarsImpl {
 	private static final Logger LOG = LoggerFactory.getLogger(SyncCalendarsImpl.class);
 	
-	private CalendarSource exchangeSource;
-	private CalendarSource otherSource;
+	private final CalendarSource exchangeSource;
+	private final CalendarSource otherSource;
 
-	public SyncCalendarsImpl(CalendarSource exchangeSource, CalendarSource otherSource) {
+	public SyncCalendarsImpl(final CalendarSource exchangeSource, final CalendarSource otherSource) {
 		this.exchangeSource = exchangeSource;
 		this.otherSource = otherSource;
 	}
 
 	protected Set<Pair<AppointmentDto, AppointmentDto>> generatePairs() throws Exception {
-		Set<Pair<AppointmentDto, AppointmentDto>> results = new HashSet<Pair<AppointmentDto, AppointmentDto>>();
+		final Set<Pair<AppointmentDto, AppointmentDto>> results = new HashSet<Pair<AppointmentDto, AppointmentDto>>();
 		// Set time frame to one month as temporary workaround for "Calendar usage limits exceeded." issue.
 		final DateTime now = new DateTime();
 		final DateTime startDate = now.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
 		final DateTime endDate = startDate.plusMonths(1);
-		Collection<AppointmentDto> otherAppointments = otherSource.getAllAppointments(startDate, endDate);
-		Collection<AppointmentDto> exchangeAppointments = exchangeSource.getAllAppointments(startDate, endDate);
-		Map<String, AppointmentDto> otherAppointmentsMap = generateExchangeIdMap(otherAppointments);
-		Map<String, AppointmentDto> exchangeAppointmentsMap = generateExchangeIdMap(exchangeAppointments);
-		for (AppointmentDto exchangeAppointment : exchangeAppointments) {
-			AppointmentDto otherAppointment = otherAppointmentsMap.get(exchangeAppointment.getExchangeId());
+		final Collection<AppointmentDto> otherAppointments = otherSource.getAllAppointments(startDate, endDate);
+		final Collection<AppointmentDto> exchangeAppointments = exchangeSource.getAllAppointments(startDate, endDate);
+		final Map<String, AppointmentDto> otherAppointmentsMap = generateExchangeIdMap(otherAppointments);
+		final Map<String, AppointmentDto> exchangeAppointmentsMap = generateExchangeIdMap(exchangeAppointments);
+		for (final AppointmentDto exchangeAppointment : exchangeAppointments) {
+			final AppointmentDto otherAppointment = otherAppointmentsMap.get(exchangeAppointment.getExchangeId());
 			results.add(new Pair<AppointmentDto, AppointmentDto>(exchangeAppointment, otherAppointment));
 		}
-		for (AppointmentDto otherAppointment : otherAppointments) {
-			AppointmentDto exchangeAppointment = exchangeAppointmentsMap.get(otherAppointment.getExchangeId());
+		for (final AppointmentDto otherAppointment : otherAppointments) {
+			final AppointmentDto exchangeAppointment = exchangeAppointmentsMap.get(otherAppointment.getExchangeId());
 			results.add(new Pair<AppointmentDto, AppointmentDto>(exchangeAppointment, otherAppointment));
 		}
 		return results;
@@ -78,20 +78,20 @@ public class SyncCalendarsImpl {
 
 		// Generate matching pairs of appointments
 		try {
-			Set<Pair<AppointmentDto, AppointmentDto>>pairs = generatePairs();
+			final Set<Pair<AppointmentDto, AppointmentDto>>pairs = generatePairs();
 
 			// Create/complete/delete as required
-			for (Pair<AppointmentDto, AppointmentDto> pair : pairs) {
+			for (final Pair<AppointmentDto, AppointmentDto> pair : pairs) {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("Problem synchronizing appointments - sync aborted", e);
 		}
 	}
 
-	public Map<String, AppointmentDto> generateExchangeIdMap(Collection<AppointmentDto> CalendarEntrys) {
-		Map<String, AppointmentDto> results = new HashMap<String, AppointmentDto>();
-		for (AppointmentDto CalendarEntry : CalendarEntrys) {
+	public Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> CalendarEntrys) {
+		final Map<String, AppointmentDto> results = new HashMap<String, AppointmentDto>();
+		for (final AppointmentDto CalendarEntry : CalendarEntrys) {
 			results.put(CalendarEntry.getExchangeId(), CalendarEntry);
 		}
 		return results;

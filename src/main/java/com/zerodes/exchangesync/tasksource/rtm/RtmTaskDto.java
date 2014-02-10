@@ -10,7 +10,7 @@ public class RtmTaskDto extends TaskDto {
 		return rtmTaskId;
 	}
 
-	public void setRtmTaskId(String rtmTaskId) {
+	public void setRtmTaskId(final String rtmTaskId) {
 		this.rtmTaskId = rtmTaskId;
 	}
 
@@ -18,7 +18,7 @@ public class RtmTaskDto extends TaskDto {
 		return rtmTimeSeriesId;
 	}
 
-	public void setRtmTimeSeriesId(String rtmTimeSeriesId) {
+	public void setRtmTimeSeriesId(final String rtmTimeSeriesId) {
 		this.rtmTimeSeriesId = rtmTimeSeriesId;
 	}
 }
