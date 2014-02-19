@@ -288,6 +288,10 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	 * @return theDate converted to local time
 	 */
 	private DateTime convertToJodaDateTime(final Date theDate, final boolean isAllDay) {
+		if (theDate == null) {
+			return null;
+		}
+
 		final TimeZone tz = Calendar.getInstance().getTimeZone();
 
 		final long msFromEpochGmt = theDate.getTime();
