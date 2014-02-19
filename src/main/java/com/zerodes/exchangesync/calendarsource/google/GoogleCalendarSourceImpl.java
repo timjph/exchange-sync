@@ -78,8 +78,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 			.setCredentialStore(credentialStore)
 			.build();
 		// authorize
-		return new AuthorizationCodeInstalledApp(flow,
-				new LocalServerReceiver()).authorize("user");
+		return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 	}
 
 	private String getCalendarId(final String name) throws IOException {
@@ -215,30 +214,36 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	}
 	
 	@Override
-	public void addAppointment(final AppointmentDto appointmentDto) throws IOException {
+	public void addAppointment(final AppointmentDto appointment) throws IOException {
 		final Event event = new Event();
 		final Map<String, String> privateProperties = new HashMap<String, String>();
-		privateProperties.put(EXT_PROPERTY_EXCHANGE_ID, appointmentDto.getExchangeId());
+		privateProperties.put(EXT_PROPERTY_EXCHANGE_ID, appointment.getExchangeId());
 		final ExtendedProperties extProperties = new ExtendedProperties();
 		extProperties.setPrivate(privateProperties);
 		event.setExtendedProperties(extProperties);
-		populateEventFromAppointmentDto(appointmentDto, event);
+		populateEventFromAppointmentDto(appointment, event);
 
 		client.events().insert(calendarId, event).execute();
+
+		LOG.info("Added Google appointment " + appointment.getSummary());
 	}
 
 	@Override
-	public void updateAppointment(final AppointmentDto appointmentDto) throws IOException {
-		final GoogleAppointmentDto googleAppointmentDto = (GoogleAppointmentDto) appointmentDto;
+	public void updateAppointment(final AppointmentDto appointment) throws IOException {
+		final GoogleAppointmentDto googleAppointmentDto = (GoogleAppointmentDto) appointment;
 		final Event event = client.events().get(calendarId, googleAppointmentDto.getGoogleId()).execute();
-		populateEventFromAppointmentDto(appointmentDto, event);
+		populateEventFromAppointmentDto(appointment, event);
 		client.events().update(calendarId, event.getId(), event).execute();
+
+		LOG.info("Updated Google appointment " + appointment.getSummary());
 	}
 
 	@Override
-	public void deleteAppointment(final AppointmentDto appointmentDto) throws IOException {
-		final GoogleAppointmentDto googleAppointmentDto = (GoogleAppointmentDto) appointmentDto;
+	public void deleteAppointment(final AppointmentDto appointment) throws IOException {
+		final GoogleAppointmentDto googleAppointmentDto = (GoogleAppointmentDto) appointment;
 		client.events().delete(calendarId, googleAppointmentDto.getGoogleId()).execute();
+
+		LOG.info("Deleted Google appointment " + appointment.getSummary());
 	}
 
 	private DateTime convertToDateTime(final org.joda.time.DateTime date) {

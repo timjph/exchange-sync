@@ -94,14 +94,14 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 		final String timelineId = createTimeline();
 		addTask(timelineId, defaultRtmListId, task);
-		LOG.debug("Added RTM task " + task.getName());
+		LOG.info("Added RTM task " + task.getName());
 	}
 
 	@Override
 	public void updateDueDate(final TaskDto task) throws Exception {
 		final String timelineId = createTimeline();
 		updateDueDate(timelineId, defaultRtmListId, (RtmTaskDto) task);
-		LOG.debug("Updated RTM task due date for " + task.getName());
+		LOG.info("Updated RTM task due date for " + task.getName());
 	}
 
 	@Override
@@ -109,9 +109,9 @@ public class RtmTaskSourceImpl implements TaskSource {
 		final String timelineId = createTimeline();
 		updateCompleteFlag(timelineId, defaultRtmListId, (RtmTaskDto) task);
 		if (task.isCompleted()) {
-			LOG.debug("Marked RTM task as completed for " + task.getName());
+			LOG.info("Marked RTM task as completed for " + task.getName());
 		} else {
-			LOG.debug("Marked RTM task as incomplete for " + task.getName());
+			LOG.info("Marked RTM task as incomplete for " + task.getName());
 		}
 	}
 
