@@ -49,7 +49,8 @@ public class SettingsImpl implements Settings {
 	@Override
 	public ExchangeSettings getExchangeSettings() {
 		return new ExchangeSettingsImpl(userSettings.exchangeHost(), userSettings.exchangeUsername(), userSettings.exchangePassword(),
-				userSettings.exchangeDomain(), userSettings.exchangeVersion());
+				userSettings.exchangeDomain(), userSettings.exchangeVersion(), userSettings.usingProxy(), userSettings.proxyHost(),
+				userSettings.proxyPort());
 	}
 
 	@Override

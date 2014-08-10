@@ -11,4 +11,10 @@ public interface ExchangeSettings {
 	String getExchangeDomain();
 
 	String getExchangeVersion();
+
+	boolean isUsingProxy();
+
+	String getProxyHost();
+
+	Integer getProxyPort();
 }

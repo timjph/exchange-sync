@@ -2,6 +2,8 @@ package com.zerodes.exchangesync.calendarsource.google;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +22,6 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.java6.auth.oauth2.FileCredentialStore;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -51,15 +52,22 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private static final String GOOGLE_CLIENT_SECRET = "RsmjfTuIDbNxLU_MdPOlvgVR";
 	private static final String EXT_PROPERTY_EXCHANGE_ID = "exchangeId";
 
-	private final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-	private final JsonFactory JSON_FACTORY = new JacksonFactory();
+	private NetHttpTransport httpTransport;
+	private final JsonFactory jsonFactory = new JacksonFactory();
 	private final Calendar client;
 	private final String calendarId;
 
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
+		if (settings.getUserSettings().usingProxy()) {
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
+					settings.getUserSettings().proxyHost(), settings.getUserSettings().proxyPort()));
+			httpTransport = new NetHttpTransport.Builder().setProxy(proxy).build();
+		} else {
+			httpTransport = new NetHttpTransport.Builder().build();
+		}
 		LOG.info("Connecting to Google Calendar...");
 		final Credential credential = authorize();
-		client = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+		client = new Calendar.Builder(httpTransport, jsonFactory, credential)
 			.setApplicationName("Exchange Sync/1.0")
 			.build();
 		calendarId = getCalendarId(settings.getUserSettings().googleCalendarName());
@@ -70,10 +78,10 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private Credential authorize() throws Exception {
 		// set up file credential store
 		final FileCredentialStore credentialStore = new FileCredentialStore(
-				new File(System.getProperty("user.home"), ".credentials/calendar.json"), JSON_FACTORY);
+				new File(System.getProperty("user.home"), ".credentials/calendar.json"), jsonFactory);
 		// set up authorization code flow
 		final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-				HTTP_TRANSPORT, JSON_FACTORY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, Collections.singleton(CalendarScopes.CALENDAR))
+				httpTransport, jsonFactory, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, Collections.singleton(CalendarScopes.CALENDAR))
 			.setCredentialStore(credentialStore)
 			.build();
 		// authorize

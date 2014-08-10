@@ -64,4 +64,23 @@ public interface UserSettings extends Config {
 	 */
 	@DefaultValue("Exchange2010_SP1")
 	String exchangeVersion();
+
+	/**
+	 * Should client use proxy to connect to services?
+	 * @return true if client should use proxy
+	 */
+	@DefaultValue("false")
+	boolean usingProxy();
+
+	/**
+	 * Proxy hostname.
+	 * @return proxy hostname
+	 */
+	String proxyHost();
+
+	/**
+	 * Proxy port.
+	 * @return proxy port
+	 */
+	Integer proxyPort();
 }

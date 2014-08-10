@@ -42,6 +42,7 @@ import microsoft.exchange.webservices.data.SearchFilter;
 import microsoft.exchange.webservices.data.SearchFilter.SearchFilterCollection;
 import microsoft.exchange.webservices.data.ServiceLocalException;
 import microsoft.exchange.webservices.data.WebCredentials;
+import microsoft.exchange.webservices.data.WebProxy;
 import microsoft.exchange.webservices.data.WellKnownFolderName;
 
 import org.joda.time.DateTime;
@@ -106,6 +107,10 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 				settings.getExchangeDomain());
 		service = new ExchangeService(ExchangeVersion.valueOf(settings.getExchangeVersion()));
 		service.setCredentials(credentials);
+		if (settings.isUsingProxy()) {
+			final WebProxy webProxy = new WebProxy(settings.getProxyHost(), settings.getProxyPort());
+			service.setWebProxy(webProxy);
+		}
 		service.setUrl(new URI("https://" + settings.getExchangeHost() + "/EWS/Exchange.asmx"));
 		service.setTraceEnabled(ENABLE_DEBUGGING);
 
