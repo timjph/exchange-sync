@@ -17,9 +17,9 @@ public class App {
 	
 	public static void main(final String[] args) {
 		final SettingsImpl settings = new SettingsImpl();
-		if (settings.getUserSettings().usingProxy()) {
-			System.setProperty("http.proxyHost", settings.getUserSettings().proxyHost());
-			System.setProperty("http.proxyPort", String.valueOf(settings.getUserSettings().proxyPort()));
+		if (settings.getUserSettings().needInternetProxy()) {
+			System.setProperty("http.proxyHost", settings.getUserSettings().internetProxyHost());
+			System.setProperty("http.proxyPort", String.valueOf(settings.getUserSettings().internetProxyPort()));
 		}
 		
 		try {

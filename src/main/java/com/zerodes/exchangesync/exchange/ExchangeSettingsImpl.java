@@ -6,21 +6,21 @@ public class ExchangeSettingsImpl implements ExchangeSettings {
 	private String exchangePassword;
 	private String exchangeDomain;
 	private String exchangeVersion;
-	private boolean usingProxy;
-	private String proxyHost;
-	private Integer proxyPort;
+	private boolean needsExchangeProxy;
+	private String exchangeProxyHost;
+	private Integer exchangeProxyPort;
 
 	public ExchangeSettingsImpl(final String exchangeHost, final String exchangeUsername, final String exchangePassword,
-								final String exchangeDomain, final String exchangeVersion, final boolean usingProxy,
-								final String proxyHost, final Integer proxyPort) {
+								final String exchangeDomain, final String exchangeVersion, final boolean needsExchangeProxy,
+								final String exchangeProxyHost, final Integer exchangeProxyPort) {
 		this.exchangeHost = exchangeHost;
 		this.exchangeUsername = exchangeUsername;
 		this.exchangePassword = exchangePassword;
 		this.exchangeDomain = exchangeDomain;
 		this.exchangeVersion = exchangeVersion;
-		this.usingProxy = usingProxy;
-		this.proxyHost = proxyHost;
-		this.proxyPort = proxyPort;
+		this.needsExchangeProxy = needsExchangeProxy;
+		this.exchangeProxyHost = exchangeProxyHost;
+		this.exchangeProxyPort = exchangeProxyPort;
 	}
 
 	@Override
@@ -49,17 +49,17 @@ public class ExchangeSettingsImpl implements ExchangeSettings {
 	}
 
 	@Override
-	public boolean isUsingProxy() {
-		return usingProxy;
+	public boolean needsExchangeProxy() {
+		return needsExchangeProxy;
 	}
 
 	@Override
-	public String getProxyHost() {
-		return proxyHost;
+	public String getExchangeProxyHost() {
+		return exchangeProxyHost;
 	}
 
 	@Override
-	public Integer getProxyPort() {
-		return proxyPort;
+	public Integer getExchangeProxyPort() {
+		return exchangeProxyPort;
 	}
 }

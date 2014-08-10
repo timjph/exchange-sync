@@ -107,8 +107,8 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 				settings.getExchangeDomain());
 		service = new ExchangeService(ExchangeVersion.valueOf(settings.getExchangeVersion()));
 		service.setCredentials(credentials);
-		if (settings.isUsingProxy()) {
-			final WebProxy webProxy = new WebProxy(settings.getProxyHost(), settings.getProxyPort());
+		if (settings.needsExchangeProxy()) {
+			final WebProxy webProxy = new WebProxy(settings.getExchangeProxyHost(), settings.getExchangeProxyPort());
 			service.setWebProxy(webProxy);
 		}
 		service.setUrl(new URI("https://" + settings.getExchangeHost() + "/EWS/Exchange.asmx"));

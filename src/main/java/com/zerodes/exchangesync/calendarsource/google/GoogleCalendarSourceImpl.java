@@ -58,9 +58,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private final String calendarId;
 
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
-		if (settings.getUserSettings().usingProxy()) {
+		if (settings.getUserSettings().needInternetProxy()) {
 			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
-					settings.getUserSettings().proxyHost(), settings.getUserSettings().proxyPort()));
+					settings.getUserSettings().internetProxyHost(), settings.getUserSettings().internetProxyPort()));
 			httpTransport = new NetHttpTransport.Builder().setProxy(proxy).build();
 		} else {
 			httpTransport = new NetHttpTransport.Builder().build();

@@ -66,21 +66,40 @@ public interface UserSettings extends Config {
 	String exchangeVersion();
 
 	/**
-	 * Should client use proxy to connect to services?
+	 * Should client use proxy to connect to Microsoft Exchange?
 	 * @return true if client should use proxy
 	 */
 	@DefaultValue("false")
-	boolean usingProxy();
+	boolean needExchangeProxy();
 
 	/**
-	 * Proxy hostname.
+	 * Proxy hostname for Microsoft Exchange.
 	 * @return proxy hostname
 	 */
-	String proxyHost();
+	String exchangeProxyHost();
 
 	/**
-	 * Proxy port.
+	 * Proxy port for Microsoft Exchange.
 	 * @return proxy port
 	 */
-	Integer proxyPort();
+	Integer exchangeProxyPort();
+
+	/**
+	 * Should client use proxy to connect to internet (non-exchange) services?
+	 * @return true if client should use proxy
+	 */
+	@DefaultValue("false")
+	boolean needInternetProxy();
+
+	/**
+	 * Proxy hostname for internet services.
+	 * @return proxy hostname
+	 */
+	String internetProxyHost();
+
+	/**
+	 * Proxy port for internet services.
+	 * @return proxy port
+	 */
+	Integer internetProxyPort();
 }
