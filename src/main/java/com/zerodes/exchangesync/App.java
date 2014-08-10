@@ -20,12 +20,12 @@ public class App {
 		
 		try {
 			// Initialize exchange source
-			final ExchangeSourceImpl exchangeSource = new ExchangeSourceImpl(settings);
+			final ExchangeSourceImpl exchangeSource = new ExchangeSourceImpl(settings.getExchangeSettings());
 			
 			// Initialize statistics collector
 			final StatisticsCollector stats = new StatisticsCollector();
 			
-			if (settings.syncAppointments()) {
+			if (settings.getUserSettings().syncAppointments()) {
 				// Initialize Google source
 				final CalendarSource googleSource = new GoogleCalendarSourceImpl(settings);
 				
@@ -34,7 +34,7 @@ public class App {
 				syncCalendars.syncAll(stats);
 			}
 			
-			if (settings.syncTasks()) {
+			if (settings.getUserSettings().syncTasks()) {
 				// Initialize RTM source
 				final TaskSource rtmSource = new RtmTaskSourceImpl(settings);
 				

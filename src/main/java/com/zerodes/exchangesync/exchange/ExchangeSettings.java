@@ -1,4 +1,4 @@
-package com.zerodes.exchangesync;
+package com.zerodes.exchangesync.exchange;
 
 public interface ExchangeSettings {
 

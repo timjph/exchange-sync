@@ -49,7 +49,6 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	// Google Id and Secret from https://code.google.com/apis/console/?pli=1#project:861974414961:access
 	private static final String GOOGLE_CLIENT_ID = "861974414961.apps.googleusercontent.com";
 	private static final String GOOGLE_CLIENT_SECRET = "RsmjfTuIDbNxLU_MdPOlvgVR";
-	private static final String USER_SETTING_CALENDAR_NAME = "googleCalendarName";
 	private static final String EXT_PROPERTY_EXCHANGE_ID = "exchangeId";
 
 	private final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -63,7 +62,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		client = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
 			.setApplicationName("Exchange Sync/1.0")
 			.build();
-		calendarId = getCalendarId(settings.getUserSetting(USER_SETTING_CALENDAR_NAME));
+		calendarId = getCalendarId(settings.getUserSettings().googleCalendarName());
 		LOG.info("Connected to Google Calendar.");
 	}
 

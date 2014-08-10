@@ -44,7 +44,6 @@ public class RtmTaskSourceImpl implements TaskSource {
 	private static final String EXCHANGE_ID_NOTE_TITLE = "ExchangeID";
 	private static final String ORIGINAL_SUBJECT_NOTE_TITLE = "Original Email Subject";
 	
-	private static final String USER_SETTING_RTM_LIST_NAME = "rtmListName";
 	private static final String INTERNAL_SETTING_FROB = "frob";
 	private static final String INTERNAL_SETTING_AUTH_TOKEN = "authToken";
 
@@ -67,7 +66,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 		case NEEDS_AUTH_TOKEN:
 			completeAuthentication();
 		}
-		this.defaultRtmListId = getIdForListName(settings.getUserSetting(USER_SETTING_RTM_LIST_NAME));
+		this.defaultRtmListId = getIdForListName(settings.getUserSettings().rtmListName());
 	}
 	
 	@Override

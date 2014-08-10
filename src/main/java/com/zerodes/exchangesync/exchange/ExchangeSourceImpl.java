@@ -49,7 +49,6 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zerodes.exchangesync.ExchangeSettings;
 import com.zerodes.exchangesync.calendarsource.CalendarSource;
 import com.zerodes.exchangesync.dto.AppointmentDto;
 import com.zerodes.exchangesync.dto.AppointmentDto.RecurrenceType;
