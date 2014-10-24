@@ -388,7 +388,11 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar, calendarView);
 		service.loadPropertiesForItems(appointments, createCalendarPropertySet());
 		for (final Appointment appointment : appointments.getItems()) {
-			results.add(convertToAppointmentDto(appointment));
+			DateTime eventStartDate = convertToJodaDateTime(appointment.getStart(), appointment.getIsAllDayEvent());
+			DateTime eventEndDate = convertToJodaDateTime(appointment.getEnd(), appointment.getIsAllDayEvent());
+			if ((eventEndDate.isAfter(startDate) || eventEndDate.isEqual(startDate)) && eventStartDate.isBefore(endDate)) {
+				results.add(convertToAppointmentDto(appointment));
+			}
 			// Due to a bug in the EWS API, the code below throws an exception, so we can't handle recurring
 			// appointments properly.
 //			if (appointment.getAppointmentType() == AppointmentType.Occurrence) {
