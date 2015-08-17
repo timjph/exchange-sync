@@ -102,4 +102,10 @@ public interface UserSettings extends Config {
 	 * @return proxy port
 	 */
 	Integer internetProxyPort();
+
+	/**
+	 * Obfuscate emails to prevent Google from sending calendar updates to attendees.
+	 * @return true if attendee emails should be obfuscated
+	 */
+	boolean obfuscateAttendeeEmails();
 }

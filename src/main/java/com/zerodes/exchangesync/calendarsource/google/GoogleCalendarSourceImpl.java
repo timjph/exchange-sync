@@ -56,6 +56,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private final JsonFactory jsonFactory = new JacksonFactory();
 	private final Calendar client;
 	private final String calendarId;
+	private final boolean obfuscateEmails;
 
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
 		if (settings.getUserSettings().needInternetProxy()) {
@@ -65,6 +66,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		} else {
 			httpTransport = new NetHttpTransport.Builder().build();
 		}
+		obfuscateEmails = settings.getUserSettings().obfuscateAttendeeEmails();
 		LOG.info("Connecting to Google Calendar...");
 		final Credential credential = authorize();
 		client = new Calendar.Builder(httpTransport, jsonFactory, credential)
@@ -179,7 +181,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		if (appointmentDto.getOrganizer() != null && appointmentDto.getOrganizer().getEmail() != null) {
 			final Organizer organizer = new Organizer();
 			organizer.setDisplayName(appointmentDto.getOrganizer().getName());
-			organizer.setEmail(appointmentDto.getOrganizer().getEmail());
+			organizer.setEmail(obfuscateEmail(appointmentDto.getOrganizer().getEmail()));
 			event.setOrganizer(organizer);
 		}
 		if (appointmentDto.getAttendees() != null) {
@@ -188,7 +190,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 				if (attendee.getEmail() != null) {
 					final EventAttendee eventAttendee = new EventAttendee();
 					eventAttendee.setDisplayName(attendee.getName());
-					eventAttendee.setEmail(attendee.getEmail());
+					eventAttendee.setEmail(obfuscateEmail(attendee.getEmail()));
 					eventAttendee.setOptional(attendee.isOptional());
 					attendees.add(eventAttendee);
 				}
@@ -253,15 +255,15 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		LOG.info("Deleted Google appointment " + appointment.getSummary());
 	}
 
-	private DateTime convertToDateTime(final org.joda.time.DateTime date) {
+	private static DateTime convertToDateTime(final org.joda.time.DateTime date) {
 		return new DateTime(date.getMillis());
 	}
 
-	private DateTime convertToDate(final org.joda.time.DateTime date) {
+	private static DateTime convertToDate(final org.joda.time.DateTime date) {
 		return new DateTime(true, date.getMillis(), null);
 	}
 
-	private EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay) {
+	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay) {
 		final EventDateTime result = new EventDateTime();
 		if (isAllDay) {
 			result.setDate(convertToDate(date));
@@ -272,14 +274,14 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return result;
 	}
 
-	private org.joda.time.DateTime convertToJodaDateTime(final DateTime googleTime) {
+	private static org.joda.time.DateTime convertToJodaDateTime(final DateTime googleTime) {
 		if (googleTime == null) {
 			return null;
 		}
 		return new org.joda.time.DateTime(googleTime.getValue(), DateTimeZone.UTC);
 	}
 
-	private org.joda.time.DateTime convertToJodaDateTime(final EventDateTime googleTime) {
+	private static org.joda.time.DateTime convertToJodaDateTime(final EventDateTime googleTime) {
 		final org.joda.time.DateTime result;
 		if (googleTime.getDateTime() == null) {
 			result = convertToJodaDateTime(googleTime.getDate());
@@ -289,12 +291,19 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return result;
 	}
 
-	public static <T> T coalesce(final T ...items) {
+	private static <T> T coalesce(final T ...items) {
 		for(final T item : items) {
 			if (item != null) {
 				return item;
 			}
 		}
 		return null;
+	}
+
+	private String obfuscateEmail(final String email) {
+		if (obfuscateEmails) {
+			return email + ".obfuscate";
+		}
+		return email;
 	}
 }
