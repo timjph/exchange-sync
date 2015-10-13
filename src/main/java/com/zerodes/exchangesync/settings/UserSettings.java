@@ -28,6 +28,14 @@ public interface UserSettings extends Config {
 	String googleCalendarName();
 
 	/**
+	 * Determines whether to synchronize the organizer and attendees for calendar appointments.
+	 * Some users have reported that disabling this resolves the "Calendar usage limits exceeded" issue.
+	 * @return
+	 */
+	@DefaultValue("true")
+	boolean googleSyncOrganizerAndAttendees();
+
+	/**
 	 * Name of the Remember The Milk list to synchronize to.
 	 * @return name of the Remember The Milk list
 	 */

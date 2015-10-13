@@ -15,6 +15,25 @@ Linux Usage Instructions
 5. Create a symlink to the jar to simplify upgrades: <code>ln -s ~/exchange-sync/exchangesync-1.0.0-SNAPSHOT-jar-with-dependencies.jar ~/exchange-sync/exchangesync.jar</code>
 6. Add the following line to your /etc/crontab file: <code>*/30 *   * * *   user   java -jar ~/exchange-sync/exchangesync.jar > ~/exchange-sync/exchangesync.log 2>&1</code> (You will need to change "user" to your username.)
 
+exchangesync.properties Values
+==============================
+
+Setting | Example | Description
+------- | ------- | -----------
+syncTasks | true | Determines whether flagged Exchange emails will be exported to Remember the Milk.
+syncAppointments | true | Determines whether Exchange calendar appointments will be exported to Google Calendar.
+exchangeHost | mail.sample.com | The host name of your Exchange mail host.
+exchangeUsername | username | Your Exchange username.
+exchangeDomain | COMPANY | Your Exchange domain.
+exchangePassword | password | Your Exchange password.
+rtmListName | Inbox | Name of the Remember The Milk list where you want tasks to be created.
+googleCalendarName | Work Calendar | Name of the Google calendar where you want appointments to be created.
+usingProxy | false | Determines whether Internet access is via an HTTP proxy.
+proxyHost | 192.168.1.2 | IP address or host name of the HTTP proxy server.
+proxyPort | 3128 | Port number of the HTTP proxy server.
+obfuscateAttendeeEmails | true | Determines whether organizer and attendees on Google Calendar appointments should be obfuscated to prevent Google from emailing those users when calendar appointments change.
+googleSyncOrganizerAndAttendees | true | Determines whether organizer and attendees should be populated on Google Calendar appointments. Some users have reported that this causes a "Calendar Usage Limits Exceeded" message.
+
 Developer Instructions
 ======================
 1. Install Maven and Git: <code>sudo apt-get install maven git</code>

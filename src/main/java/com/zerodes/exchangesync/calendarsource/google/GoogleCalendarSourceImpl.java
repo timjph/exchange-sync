@@ -57,6 +57,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private final Calendar client;
 	private final String calendarId;
 	private final boolean obfuscateEmails;
+	private final boolean syncOrganizerAndAttendees;
 
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
 		if (settings.getUserSettings().needInternetProxy()) {
@@ -67,6 +68,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 			httpTransport = new NetHttpTransport.Builder().build();
 		}
 		obfuscateEmails = settings.getUserSettings().obfuscateAttendeeEmails();
+		syncOrganizerAndAttendees = settings.getUserSettings().googleSyncOrganizerAndAttendees();
 		LOG.info("Connecting to Google Calendar...");
 		final Credential credential = authorize();
 		client = new Calendar.Builder(httpTransport, jsonFactory, credential)
@@ -178,24 +180,26 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		event.setStart(convertToEventDateTime(appointmentDto.getStart(), appointmentDto.isAllDay()));
 		event.setEnd(convertToEventDateTime(appointmentDto.getEnd(), appointmentDto.isAllDay()));
 		event.setLocation(appointmentDto.getLocation());
-		if (appointmentDto.getOrganizer() != null && appointmentDto.getOrganizer().getEmail() != null) {
-			final Organizer organizer = new Organizer();
-			organizer.setDisplayName(appointmentDto.getOrganizer().getName());
-			organizer.setEmail(obfuscateEmail(appointmentDto.getOrganizer().getEmail()));
-			event.setOrganizer(organizer);
-		}
-		if (appointmentDto.getAttendees() != null) {
-			final List<EventAttendee> attendees = new ArrayList<EventAttendee>();
-			for (final PersonDto attendee : appointmentDto.getAttendees()) {
-				if (attendee.getEmail() != null) {
-					final EventAttendee eventAttendee = new EventAttendee();
-					eventAttendee.setDisplayName(attendee.getName());
-					eventAttendee.setEmail(obfuscateEmail(attendee.getEmail()));
-					eventAttendee.setOptional(attendee.isOptional());
-					attendees.add(eventAttendee);
-				}
+		if (syncOrganizerAndAttendees) {
+			if (appointmentDto.getOrganizer() != null && appointmentDto.getOrganizer().getEmail() != null) {
+				final Organizer organizer = new Organizer();
+				organizer.setDisplayName(appointmentDto.getOrganizer().getName());
+				organizer.setEmail(obfuscateEmail(appointmentDto.getOrganizer().getEmail()));
+				event.setOrganizer(organizer);
 			}
-			event.setAttendees(attendees);
+			if (appointmentDto.getAttendees() != null) {
+				final List<EventAttendee> attendees = new ArrayList<EventAttendee>();
+				for (final PersonDto attendee : appointmentDto.getAttendees()) {
+					if (attendee.getEmail() != null) {
+						final EventAttendee eventAttendee = new EventAttendee();
+						eventAttendee.setDisplayName(attendee.getName());
+						eventAttendee.setEmail(obfuscateEmail(attendee.getEmail()));
+						eventAttendee.setOptional(attendee.isOptional());
+						attendees.add(eventAttendee);
+					}
+				}
+				event.setAttendees(attendees);
+			}
 		}
 		if (appointmentDto.getReminderMinutesBeforeStart() != null) {
 			final EventReminder reminder = new EventReminder();
