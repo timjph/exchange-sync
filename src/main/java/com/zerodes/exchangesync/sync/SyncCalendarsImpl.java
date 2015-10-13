@@ -26,12 +26,12 @@ public class SyncCalendarsImpl {
 		this.otherSource = otherSource;
 	}
 
-	protected Set<Pair<AppointmentDto, AppointmentDto>> generatePairs() throws Exception {
+	protected Set<Pair<AppointmentDto, AppointmentDto>> generatePairs(final int monthsToExport) throws Exception {
 		final Set<Pair<AppointmentDto, AppointmentDto>> results = new HashSet<Pair<AppointmentDto, AppointmentDto>>();
 		// Set time frame to one month as temporary workaround for "Calendar usage limits exceeded." issue.
 		final DateTime now = new DateTime();
 		final DateTime startDate = now.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
-		final DateTime endDate = startDate.plusMonths(1);
+		final DateTime endDate = startDate.plusMonths(monthsToExport);
 		final Collection<AppointmentDto> otherAppointments = otherSource.getAllAppointments(startDate, endDate);
 		final Collection<AppointmentDto> exchangeAppointments = exchangeSource.getAllAppointments(startDate, endDate);
 		final Map<String, AppointmentDto> otherAppointmentsMap = generateExchangeIdMap(otherAppointments);
@@ -73,12 +73,12 @@ public class SyncCalendarsImpl {
 		}
 	}
 
-	public void syncAll(final StatisticsCollector stats) {
+	public void syncAll(final StatisticsCollector stats, final int monthsToExport) {
 		LOG.info("Synchronizing calendars...");
 
 		// Generate matching pairs of appointments
 		try {
-			final Set<Pair<AppointmentDto, AppointmentDto>>pairs = generatePairs();
+			final Set<Pair<AppointmentDto, AppointmentDto>>pairs = generatePairs(monthsToExport);
 
 			// Create/complete/delete as required
 			for (final Pair<AppointmentDto, AppointmentDto> pair : pairs) {

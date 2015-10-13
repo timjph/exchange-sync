@@ -35,7 +35,7 @@ public class App {
 				
 				// Synchronize appointments
 				final SyncCalendarsImpl syncCalendars = new SyncCalendarsImpl(exchangeSource, googleSource);
-				syncCalendars.syncAll(stats);
+				syncCalendars.syncAll(stats, settings.getUserSettings().appointmentMonthsToExport());
 			}
 			
 			if (settings.getUserSettings().syncTasks()) {

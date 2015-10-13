@@ -116,4 +116,10 @@ public interface UserSettings extends Config {
 	 * @return true if attendee emails should be obfuscated
 	 */
 	boolean obfuscateAttendeeEmails();
+
+	/**
+	 * Number of months in the future to export to Google Calendar.
+	 */
+	@DefaultValue("1")
+	int appointmentMonthsToExport();
 }

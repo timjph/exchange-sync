@@ -26,6 +26,7 @@ exchangeHost | mail.sample.com | The host name of your Exchange mail host.
 exchangeUsername | username | Your Exchange username.
 exchangeDomain | COMPANY | Your Exchange domain.
 exchangePassword | password | Your Exchange password.
+exchangeVersion | Exchange2010_SP1 | Your Exchange version. Must be one of: Exchange2007_SP1, Exchange2010, Exchange2010_SP1. Leave blank if not sure or if you have a version newer than Exchange 2010 SP1.
 rtmListName | Inbox | Name of the Remember The Milk list where you want tasks to be created.
 googleCalendarName | Work Calendar | Name of the Google calendar where you want appointments to be created.
 usingProxy | false | Determines whether Internet access is via an HTTP proxy.
@@ -33,6 +34,7 @@ proxyHost | 192.168.1.2 | IP address or host name of the HTTP proxy server.
 proxyPort | 3128 | Port number of the HTTP proxy server.
 obfuscateAttendeeEmails | true | Determines whether organizer and attendees on Google Calendar appointments should be obfuscated to prevent Google from emailing those users when calendar appointments change.
 googleSyncOrganizerAndAttendees | true | Determines whether organizer and attendees should be populated on Google Calendar appointments. Some users have reported that this causes a "Calendar Usage Limits Exceeded" message.
+appointmentMonthsToExport | 1 | Number of months in the future to export appointments for.
 
 Developer Instructions
 ======================
