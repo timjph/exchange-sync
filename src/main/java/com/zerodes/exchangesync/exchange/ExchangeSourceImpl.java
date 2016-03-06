@@ -1,49 +1,47 @@
 package com.zerodes.exchangesync.exchange;
 
 import java.net.URI;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 
-import microsoft.exchange.webservices.data.Appointment;
-import microsoft.exchange.webservices.data.Attendee;
-import microsoft.exchange.webservices.data.BasePropertySet;
-import microsoft.exchange.webservices.data.BodyType;
-import microsoft.exchange.webservices.data.CalendarView;
-import microsoft.exchange.webservices.data.ConflictResolutionMode;
-import microsoft.exchange.webservices.data.EmailAddress;
-import microsoft.exchange.webservices.data.EmailMessage;
-import microsoft.exchange.webservices.data.ExchangeCredentials;
-import microsoft.exchange.webservices.data.ExchangeService;
-import microsoft.exchange.webservices.data.ExchangeVersion;
-import microsoft.exchange.webservices.data.ExtendedProperty;
-import microsoft.exchange.webservices.data.ExtendedPropertyDefinition;
-import microsoft.exchange.webservices.data.FindFoldersResults;
-import microsoft.exchange.webservices.data.FindItemsResults;
-import microsoft.exchange.webservices.data.Folder;
-import microsoft.exchange.webservices.data.FolderId;
-import microsoft.exchange.webservices.data.FolderSchema;
-import microsoft.exchange.webservices.data.FolderTraversal;
-import microsoft.exchange.webservices.data.FolderView;
-import microsoft.exchange.webservices.data.Item;
-import microsoft.exchange.webservices.data.ItemId;
-import microsoft.exchange.webservices.data.ItemView;
-import microsoft.exchange.webservices.data.LogicalOperator;
-import microsoft.exchange.webservices.data.MapiPropertyType;
-import microsoft.exchange.webservices.data.MeetingRequest;
-import microsoft.exchange.webservices.data.MessageBody;
-import microsoft.exchange.webservices.data.PropertySet;
-import microsoft.exchange.webservices.data.Recurrence;
-import microsoft.exchange.webservices.data.SearchFilter;
-import microsoft.exchange.webservices.data.SearchFilter.SearchFilterCollection;
-import microsoft.exchange.webservices.data.ServiceLocalException;
-import microsoft.exchange.webservices.data.WebCredentials;
-import microsoft.exchange.webservices.data.WebProxy;
-import microsoft.exchange.webservices.data.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.ExchangeService;
+import microsoft.exchange.webservices.data.core.PropertySet;
+import microsoft.exchange.webservices.data.core.WebProxy;
+import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
+import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
+import microsoft.exchange.webservices.data.core.enumeration.property.BodyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.MapiPropertyType;
+import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.enumeration.search.FolderTraversal;
+import microsoft.exchange.webservices.data.core.enumeration.search.LogicalOperator;
+import microsoft.exchange.webservices.data.core.enumeration.service.ConflictResolutionMode;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
+import microsoft.exchange.webservices.data.core.service.folder.Folder;
+import microsoft.exchange.webservices.data.core.service.item.Appointment;
+import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import microsoft.exchange.webservices.data.core.service.item.Item;
+import microsoft.exchange.webservices.data.core.service.item.MeetingRequest;
+import microsoft.exchange.webservices.data.core.service.schema.FolderSchema;
+import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
+import microsoft.exchange.webservices.data.credential.WebCredentials;
+import microsoft.exchange.webservices.data.property.complex.Attendee;
+import microsoft.exchange.webservices.data.property.complex.EmailAddress;
+import microsoft.exchange.webservices.data.property.complex.ExtendedProperty;
+import microsoft.exchange.webservices.data.property.complex.FolderId;
+import microsoft.exchange.webservices.data.property.complex.ItemId;
+import microsoft.exchange.webservices.data.property.complex.MessageBody;
+import microsoft.exchange.webservices.data.property.complex.recurrence.pattern.Recurrence;
+import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
+import microsoft.exchange.webservices.data.search.CalendarView;
+import microsoft.exchange.webservices.data.search.FindFoldersResults;
+import microsoft.exchange.webservices.data.search.FindItemsResults;
+import microsoft.exchange.webservices.data.search.FolderView;
+import microsoft.exchange.webservices.data.search.ItemView;
+import microsoft.exchange.webservices.data.search.filter.SearchFilter;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -127,7 +125,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		// Return a task for each flagged email
 		final Set<TaskDto> results = new HashSet<TaskDto>();
 		// Take a look at http://blogs.planetsoftware.com.au/paul/archive/2010/05/20/exchange-web-services-ews-managed-api-ndash-part-2.aspx
-		final SearchFilterCollection searchFilterCollection = new SearchFilterCollection(LogicalOperator.Or);
+		final SearchFilter.SearchFilterCollection searchFilterCollection = new SearchFilter.SearchFilterCollection(LogicalOperator.Or);
 		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "1")); // Flagged complete
 		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "2")); // Flagged
 		final ItemView itemView = new ItemView(MAX_RESULTS);
@@ -152,8 +150,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		searchFilterCollection.add(searchFilter1);
 		searchFilterCollection.add(searchFilter2);
 
-		final FindFoldersResults findFoldersResults = service.findFolders(
-				rootFolderId, searchFilterCollection, folderView);
+		final FindFoldersResults findFoldersResults = service.findFolders(rootFolderId, searchFilterCollection, folderView);
 
 		if (findFoldersResults.getFolders().size() == 0) {
 			return null;
@@ -165,7 +162,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		Integer flagValue = null;
 		Date dueDate = null;
 		for (final ExtendedProperty extendedProperty : email.getExtendedProperties()) {
-			if (extendedProperty.getPropertyDefinition().getTag() != null && extendedProperty.getPropertyDefinition().getTag() == 16) {
+			if (extendedProperty.getPropertyDefinition().getTag() != null && extendedProperty.getPropertyDefinition().getTag() == PID_TAG_FLAG_STATUS) {
 				flagValue = (Integer) extendedProperty.getValue();
 			} else if (extendedProperty.getPropertyDefinition().getId() != null && extendedProperty.getPropertyDefinition().getId() == PID_LID_TASK_DUE_DATE) {
 				dueDate = (Date) extendedProperty.getValue();
@@ -285,28 +282,18 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	}
 
 	/**
-	 * There is a bug in the Java EWS in which time is returned in GMT but with local timezone.
-	 * This function fixes those times.
+	 * Convert EWS dates to Joda time DateTime objects.
 	 *
 	 * @param theDate the date returned from EWS
-	 * @return theDate converted to local time
+	 * @return theDate converted to GMT as a DateTime object
 	 */
 	private DateTime convertToJodaDateTime(final Date theDate, final boolean isAllDay) {
 		if (theDate == null) {
 			return null;
 		}
 
-		final TimeZone tz = Calendar.getInstance().getTimeZone();
-
-		final long msFromEpochGmt = theDate.getTime();
-
-		// gives you the current offset in ms from GMT at the current date
-		final int offsetFromUTC = tz.getOffset(msFromEpochGmt);
-
-		// create a new calendar in GMT timezone, set to this date and add the
-		// offset
+		// Create a new DateTime in GMT timezone
 		DateTime newTime = new DateTime(theDate.getTime(), DateTimeZone.UTC);
-		newTime = newTime.plus(offsetFromUTC);
 		// Return all day appointments as 00:00Z regardless of time zone
 		if (isAllDay) {
 			newTime = newTime.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
@@ -386,7 +373,8 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		final CalendarView calendarView = new CalendarView(startDate.toDate(), endDate.toDate(), MAX_RESULTS);
 		calendarView.setPropertySet(createIdOnlyPropertySet());
 		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar, calendarView);
-		service.loadPropertiesForItems(appointments, createCalendarPropertySet());
+		final Iterable<Item> items = new ArrayList<Item>(appointments.getItems());
+		service.loadPropertiesForItems(items, createCalendarPropertySet());
 		for (final Appointment appointment : appointments.getItems()) {
 			DateTime eventStartDate = convertToJodaDateTime(appointment.getStart(), appointment.getIsAllDayEvent());
 			DateTime eventEndDate = convertToJodaDateTime(appointment.getEnd(), appointment.getIsAllDayEvent());

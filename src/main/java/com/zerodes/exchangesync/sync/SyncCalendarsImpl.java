@@ -89,10 +89,10 @@ public class SyncCalendarsImpl {
 		}
 	}
 
-	public Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> CalendarEntrys) {
+	public Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> calendarEntrys) {
 		final Map<String, AppointmentDto> results = new HashMap<String, AppointmentDto>();
-		for (final AppointmentDto CalendarEntry : CalendarEntrys) {
-			results.put(CalendarEntry.getExchangeId(), CalendarEntry);
+		for (final AppointmentDto calendarEntry : calendarEntrys) {
+			results.put(calendarEntry.getExchangeId(), calendarEntry);
 		}
 		return results;
 	}
