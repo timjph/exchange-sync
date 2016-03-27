@@ -93,6 +93,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 	private static final int PR_FLAG_STATUS_FOLLOWUP_COMPLETE = 1;
 	private static final int PR_FLAG_STATUS_FOLLOWUP_FLAGGED = 2;
+	private static final String ROUTING_TYPE_SMTP = "SMTP";
 
 	private final ExchangeService service;
 
@@ -184,7 +185,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public PersonDto convertToPersonDto(final EmailAddress email, final boolean optional) {
 		final PersonDto person = new PersonDto();
 		person.setName(email.getName());
-		if (email.getRoutingType().equals("SMTP")) {
+		if (ROUTING_TYPE_SMTP.equals(email.getRoutingType())) {
 			person.setEmail(email.getAddress());
 		}
 		person.setOptional(optional);
