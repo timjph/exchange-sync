@@ -22,6 +22,7 @@ public class App {
 			System.setProperty("http.proxyPort", String.valueOf(settings.getUserSettings().internetProxyPort()));
 		}
 		
+		boolean success = true;
 		try {
 			// Initialize exchange source
 			final ExchangeSourceImpl exchangeSource = new ExchangeSourceImpl(settings.getExchangeSettings());
@@ -35,7 +36,7 @@ public class App {
 				
 				// Synchronize appointments
 				final SyncCalendarsImpl syncCalendars = new SyncCalendarsImpl(exchangeSource, googleSource);
-				syncCalendars.syncAll(stats, settings.getUserSettings().appointmentMonthsToExport());
+				success = success && syncCalendars.syncAll(stats, settings.getUserSettings().appointmentMonthsToExport());
 			}
 			
 			if (settings.getUserSettings().syncTasks()) {
@@ -44,15 +45,19 @@ public class App {
 				
 				// Synchronize tasks
 				final SyncTasksImpl syncTasks = new SyncTasksImpl(exchangeSource, rtmSource);
-				syncTasks.syncAll(stats);
+				success = success && syncTasks.syncAll(stats);
 			}
 			
 			// Show stats
 			stats.display();
 		} catch (final Exception e) {
 			LOG.error("An unexpected exception occurred", e);
+			success = false;
 		} finally {
 			settings.save();
+		}
+		if (!success) {
+			System.exit(1);
 		}
 	}
 }

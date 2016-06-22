@@ -80,7 +80,7 @@ public class SyncTasksImpl {
 		}
 	}
 
-	public void syncAll(final StatisticsCollector stats) {
+	public boolean syncAll(final StatisticsCollector stats) {
 		LOG.info("Synchronizing tasks...");
 
 		// Generate matching pairs of tasks
@@ -90,9 +90,11 @@ public class SyncTasksImpl {
 			for (final Pair<TaskDto, TaskDto> pair : pairs) {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
+			return true;
 		} catch (final Exception e) {
 			LOG.error("Problem synchronizing tasks - sync aborted", e);
 		}
+		return false;
 	}
 
 	public Map<String, TaskDto> generateExchangeIdMap(final Collection<TaskDto> tasks) {

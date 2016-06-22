@@ -73,7 +73,7 @@ public class SyncCalendarsImpl {
 		}
 	}
 
-	public void syncAll(final StatisticsCollector stats, final int monthsToExport) {
+	public boolean syncAll(final StatisticsCollector stats, final int monthsToExport) {
 		LOG.info("Synchronizing calendars...");
 
 		// Generate matching pairs of appointments
@@ -84,9 +84,11 @@ public class SyncCalendarsImpl {
 			for (final Pair<AppointmentDto, AppointmentDto> pair : pairs) {
 				sync(pair.getLeft(), pair.getRight(), stats);
 			}
+			return true;
 		} catch (final Exception e) {
 			LOG.error("Problem synchronizing appointments - sync aborted", e);
 		}
+		return false;
 	}
 
 	public Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> calendarEntrys) {
