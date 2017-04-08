@@ -177,6 +177,8 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 			throw new RuntimeException("Found email without follow-up flag!");
 		} else if (flagValue == PR_FLAG_STATUS_FOLLOWUP_COMPLETE) {
 			task.setCompleted(true);
+		} else {
+			LOG.debug("Found flagged email " + email.getSubject());
 		}
 		task.setDueDate(convertToJodaDateTime(dueDate, false));
 		return task;
