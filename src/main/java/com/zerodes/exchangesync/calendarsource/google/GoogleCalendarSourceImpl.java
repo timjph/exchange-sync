@@ -147,7 +147,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private AppointmentDto convertToAppointmentDto(final Event event) {
 		final GoogleAppointmentDto result = new GoogleAppointmentDto();
 		result.setGoogleId(event.getId());
-		result.setExchangeId(event.getExtendedProperties().getPrivate().get(EXT_PROPERTY_EXCHANGE_ID));
+		if (event.getExtendedProperties() != null && event.getExtendedProperties().getPrivate() != null) {
+			result.setExchangeId(event.getExtendedProperties().getPrivate().get(EXT_PROPERTY_EXCHANGE_ID));
+		}
 		result.setLastModified(convertToJodaDateTime(event.getUpdated()));
 		result.setSummary(event.getSummary());
 		result.setDescription(event.getDescription());
