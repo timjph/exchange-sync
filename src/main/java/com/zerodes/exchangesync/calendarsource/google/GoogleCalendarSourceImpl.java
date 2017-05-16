@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import microsoft.exchange.webservices.data.util.TimeZoneUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,8 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 
 	private final String calendarId;
 
+	private final DateTimeZone calendarTimeZone;
+
 	private final boolean obfuscateEmails;
 
 	private final boolean syncOrganizerAndAttendees;
@@ -85,6 +88,7 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		final Credential credential = authorize();
 		client = new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build();
 		calendarId = getCalendarId(settings.getUserSettings().googleCalendarName());
+		calendarTimeZone = getCalendarTimeZone(calendarId);
 		LOG.info("Connected to Google Calendar.");
 	}
 
@@ -112,6 +116,16 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 			}
 		}
 		return null;
+	}
+
+	private DateTimeZone getCalendarTimeZone(final String id) {
+		try {
+			final String timeZoneName = client.calendars().get(id).execute().getTimeZone();
+			return DateTimeZone.forID(timeZoneName);
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -190,8 +204,8 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 	private void populateEventFromAppointmentDto(final AppointmentDto appointmentDto, final Event event) {
 		event.setSummary(appointmentDto.getSummary());
 		event.setDescription(appointmentDto.getDescription());
-		event.setStart(convertToEventDateTime(appointmentDto.getStart(), appointmentDto.isAllDay()));
-		event.setEnd(convertToEventDateTime(appointmentDto.getEnd(), appointmentDto.isAllDay()));
+		event.setStart(convertToEventDateTime(appointmentDto.getStart(), appointmentDto.isAllDay(), calendarTimeZone));
+		event.setEnd(convertToEventDateTime(appointmentDto.getEnd(), appointmentDto.isAllDay(), calendarTimeZone));
 		event.setLocation(appointmentDto.getLocation());
 		if (syncOrganizerAndAttendees) {
 			if (appointmentDto.getOrganizer() != null && appointmentDto.getOrganizer().getEmail() != null) {
@@ -276,18 +290,18 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return new DateTime(date.getMillis());
 	}
 
-	private static DateTime convertToDate(final org.joda.time.DateTime date) {
-		return new DateTime(true, date.getMillis(), null);
+	private static DateTime convertToDate(final org.joda.time.DateTime date, int tzShift) {
+		return new DateTime(true, date.getMillis() + tzShift, null);
 	}
 
-	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay) {
+	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay, DateTimeZone calendarTimeZone) {
 		final EventDateTime result = new EventDateTime();
 		if (isAllDay) {
-			result.setDate(convertToDate(date));
+			result.setDate(convertToDate(date, calendarTimeZone.getOffset(date.getMillis())));
 		} else {
 			result.setDateTime(convertToDateTime(date));
 		}
-		result.setTimeZone("UTC");
+		result.setTimeZone(calendarTimeZone.getID());
 		return result;
 	}
 
