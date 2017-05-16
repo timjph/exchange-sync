@@ -171,7 +171,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		}
 		final TaskDto task = new TaskDto();
 		task.setExchangeId(email.getId().getUniqueId());
-		task.setLastModified(convertToJodaDateTime(email.getLastModifiedTime(), false));
+		task.setLastModified(convertToJodaDateTime(email.getLastModifiedTime()));
 		task.setName(email.getSubject());
 		if (flagValue == null) {
 			throw new RuntimeException("Found email without follow-up flag!");
@@ -180,7 +180,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		} else {
 			LOG.debug("Found flagged email " + email.getSubject());
 		}
-		task.setDueDate(convertToJodaDateTime(dueDate, false));
+		task.setDueDate(convertToJodaDateTime(dueDate));
 		return task;
 	}
 	
@@ -197,15 +197,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public AppointmentDto convertToAppointmentDto(final Appointment appointment) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(appointment.getId().getUniqueId());
-		appointmentDto.setLastModified(convertToJodaDateTime(appointment.getLastModifiedTime(), false));
+		appointmentDto.setLastModified(convertToJodaDateTime(appointment.getLastModifiedTime()));
 		appointmentDto.setSummary(appointment.getSubject());
 		try {
 			appointmentDto.setDescription(MessageBody.getStringFromMessageBody(appointment.getBody()));
 		} catch (final Exception e) {
 			LOG.error("Unable to retrieve appointment body from Exchange", e);
 		}
-		appointmentDto.setStart(convertToJodaDateTime(appointment.getStart(), appointment.getIsAllDayEvent()));
-		appointmentDto.setEnd(convertToJodaDateTime(appointment.getEnd(), appointment.getIsAllDayEvent()));
+		appointmentDto.setStart(convertToJodaDateTime(appointment.getStart()));
+		appointmentDto.setEnd(convertToJodaDateTime(appointment.getEnd()));
 		appointmentDto.setAllDay(appointment.getIsAllDayEvent());
 		appointmentDto.setLocation(appointment.getLocation());
 		if (appointment.getOrganizer() != null) {
@@ -242,15 +242,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public AppointmentDto convertToAppointmentDto(final MeetingRequest meeting) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(meeting.getId().getUniqueId());
-		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime(), false));
+		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime()));
 		appointmentDto.setSummary(meeting.getSubject());
 		try {
 			appointmentDto.setDescription(MessageBody.getStringFromMessageBody(meeting.getBody()));
 		} catch (final Exception e) {
 			LOG.error("Unable to retrieve appointment body from Exchange", e);
 		}
-		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart(), meeting.getIsAllDayEvent()));
-		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd(), meeting.getIsAllDayEvent()));
+		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart()));
+		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd()));
 		appointmentDto.setAllDay(meeting.getIsAllDayEvent());
 		appointmentDto.setLocation(meeting.getLocation());
 		if (meeting.getOrganizer() != null) {
@@ -290,18 +290,13 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	 * @param theDate the date returned from EWS
 	 * @return theDate converted to GMT as a DateTime object
 	 */
-	private DateTime convertToJodaDateTime(final Date theDate, final boolean isAllDay) {
+	private DateTime convertToJodaDateTime(final Date theDate) {
 		if (theDate == null) {
 			return null;
 		}
 
 		// Create a new DateTime in GMT timezone
-		DateTime newTime = new DateTime(theDate.getTime(), DateTimeZone.UTC);
-		// Return all day appointments as 00:00Z regardless of time zone
-		if (isAllDay) {
-			newTime = newTime.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0);
-		}
-		return newTime;
+		return new DateTime(theDate.getTime(), DateTimeZone.UTC);
 	}
 
 	private PropertySet createIdOnlyPropertySet() {
@@ -379,8 +374,8 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		final Iterable<Item> items = new ArrayList<Item>(appointments.getItems());
 		service.loadPropertiesForItems(items, createCalendarPropertySet());
 		for (final Appointment appointment : appointments.getItems()) {
-			DateTime eventStartDate = convertToJodaDateTime(appointment.getStart(), appointment.getIsAllDayEvent());
-			DateTime eventEndDate = convertToJodaDateTime(appointment.getEnd(), appointment.getIsAllDayEvent());
+			DateTime eventStartDate = convertToJodaDateTime(appointment.getStart());
+			DateTime eventEndDate = convertToJodaDateTime(appointment.getEnd());
 			if ((eventEndDate.isAfter(startDate) || eventEndDate.isEqual(startDate)) && eventStartDate.isBefore(endDate)) {
 				results.add(convertToAppointmentDto(appointment));
 			}
