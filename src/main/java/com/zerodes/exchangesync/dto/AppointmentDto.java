@@ -134,6 +134,7 @@ public class AppointmentDto {
 		dest.location = location;
 		dest.organizer = organizer;
 		dest.attendees = attendees;
+		dest.allDay = allDay;
 	}
 
 	public enum RecurrenceType {
