@@ -117,14 +117,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return null;
 	}
 
-	private DateTimeZone getCalendarTimeZone(final String id) {
-		try {
-			final String timeZoneName = client.calendars().get(id).execute().getTimeZone();
-			return DateTimeZone.forID(timeZoneName);
-		}
-		catch (IOException e) {
-			return null;
-		}
+	private DateTimeZone getCalendarTimeZone(final String id) throws IOException {
+		final String timeZoneName = client.calendars().get(id).execute().getTimeZone();
+		return DateTimeZone.forID(timeZoneName);
 	}
 
 	@Override
@@ -289,11 +284,11 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return new DateTime(date.getMillis());
 	}
 
-	private static DateTime convertToDate(final org.joda.time.DateTime date, int tzShift) {
+	private static DateTime convertToDate(final org.joda.time.DateTime date, final int tzShift) {
 		return new DateTime(true, date.getMillis() + tzShift, null);
 	}
 
-	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay, DateTimeZone calendarTimeZone) {
+	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay, final DateTimeZone calendarTimeZone) {
 		final EventDateTime result = new EventDateTime();
 		if (isAllDay) {
 			result.setDate(convertToDate(date, calendarTimeZone.getOffset(date.getMillis())));
