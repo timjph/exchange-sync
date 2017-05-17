@@ -55,6 +55,9 @@ import com.zerodes.exchangesync.dto.PersonDto;
 import com.zerodes.exchangesync.dto.TaskDto;
 import com.zerodes.exchangesync.tasksource.TaskSource;
 
+/**
+ * Exchange data source that can read flagged emails (as Tasks) and calendar Appointments.
+ */
 public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	private static final Logger LOG = LoggerFactory.getLogger(ExchangeSourceImpl.class);
 
@@ -78,17 +81,28 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	private static final int PID_LID_TASK_MODE = 0x8161; // http://msdn.microsoft.com/en-us/library/cc765719
 
 	private static final ExtendedPropertyDefinition PR_FLAG_STATUS = new ExtendedPropertyDefinition(PID_TAG_FLAG_STATUS, MapiPropertyType.Integer);
-	private static final ExtendedPropertyDefinition PR_FLAG_REQUEST = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_FLAG_REQUEST, MapiPropertyType.String);
-	private static final ExtendedPropertyDefinition PR_TODO_ORDINAL_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TODO_ORDINAL_DATE, MapiPropertyType.SystemTime);
-	private static final ExtendedPropertyDefinition PR_TODO_SUB_ORDINAL = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TODO_SUB_ORDINAL, MapiPropertyType.String);
-	private static final ExtendedPropertyDefinition PR_TASK_COMPLETE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_COMPLETE, MapiPropertyType.Boolean);
-	private static final ExtendedPropertyDefinition PR_TASK_STATUS = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_STATUS, MapiPropertyType.Integer);
-	private static final ExtendedPropertyDefinition PR_TODO_TITLE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TODO_TITLE, MapiPropertyType.String);
-	private static final ExtendedPropertyDefinition PR_TASK_START_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_START_DATE, MapiPropertyType.SystemTime);
-	private static final ExtendedPropertyDefinition PR_TASK_DUE_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_TASK, PID_LID_TASK_DUE_DATE, MapiPropertyType.SystemTime);
-	private static final ExtendedPropertyDefinition PR_TASK_DATE_COMPLETED = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_DATE_COMPLETED, MapiPropertyType.SystemTime);
-	private static final ExtendedPropertyDefinition PR_PERCENT_COMPLETE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_PERCENT_COMPLETE, MapiPropertyType.Double);
-	private static final ExtendedPropertyDefinition PR_TASK_MODE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_MODE, MapiPropertyType.Integer);
+	private static final ExtendedPropertyDefinition PR_FLAG_REQUEST = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_FLAG_REQUEST,
+			MapiPropertyType.String);
+	private static final ExtendedPropertyDefinition PR_TODO_ORDINAL_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON,
+			PID_LID_TODO_ORDINAL_DATE, MapiPropertyType.SystemTime);
+	private static final ExtendedPropertyDefinition PR_TODO_SUB_ORDINAL = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON,
+			PID_LID_TODO_SUB_ORDINAL, MapiPropertyType.String);
+	private static final ExtendedPropertyDefinition PR_TASK_COMPLETE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_COMPLETE,
+			MapiPropertyType.Boolean);
+	private static final ExtendedPropertyDefinition PR_TASK_STATUS = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_STATUS,
+			MapiPropertyType.Integer);
+	private static final ExtendedPropertyDefinition PR_TODO_TITLE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TODO_TITLE,
+			MapiPropertyType.String);
+	private static final ExtendedPropertyDefinition PR_TASK_START_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON,
+			PID_LID_TASK_START_DATE, MapiPropertyType.SystemTime);
+	private static final ExtendedPropertyDefinition PR_TASK_DUE_DATE = new ExtendedPropertyDefinition(PROPERTY_SET_TASK, PID_LID_TASK_DUE_DATE,
+			MapiPropertyType.SystemTime);
+	private static final ExtendedPropertyDefinition PR_TASK_DATE_COMPLETED = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON,
+			PID_LID_TASK_DATE_COMPLETED, MapiPropertyType.SystemTime);
+	private static final ExtendedPropertyDefinition PR_PERCENT_COMPLETE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON,
+			PID_LID_PERCENT_COMPLETE, MapiPropertyType.Double);
+	private static final ExtendedPropertyDefinition PR_TASK_MODE = new ExtendedPropertyDefinition(PROPERTY_SET_COMMON, PID_LID_TASK_MODE,
+			MapiPropertyType.Integer);
 	private static final ExtendedPropertyDefinition PR_ALL_FOLDERS = new ExtendedPropertyDefinition(13825, MapiPropertyType.Integer);
 
 	private static final int PR_FLAG_STATUS_FOLLOWUP_COMPLETE = 1;
@@ -97,13 +111,17 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 	private final ExchangeService service;
 
+	/**
+	 * Constructor for instantiating Exchange data source.
+	 *
+	 * @param settings the settings to use when reading from Microsoft Exchange
+	 * @throws Exception if an error occurs
+	 */
 	public ExchangeSourceImpl(final ExchangeSettings settings) throws Exception {
 		LOG.info("Connecting to Exchange (" + settings.getExchangeHost() + ") as " + settings.getExchangeUsername() + "...");
 
-		final ExchangeCredentials credentials = new WebCredentials(
-				settings.getExchangeUsername(),
-				settings.getExchangePassword(),
-				settings.getExchangeDomain());
+		final ExchangeCredentials credentials = new WebCredentials(settings.getExchangeUsername(),
+				settings.getExchangePassword(), settings.getExchangeDomain());
 		service = new ExchangeService(ExchangeVersion.valueOf(settings.getExchangeVersion()));
 		service.setCredentials(credentials);
 		if (settings.needsExchangeProxy()) {
@@ -125,8 +143,10 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	public Set<TaskDto> getAllTasks() throws Exception {
 		// Return a task for each flagged email
 		final Set<TaskDto> results = new HashSet<TaskDto>();
-		// Take a look at http://blogs.planetsoftware.com.au/paul/archive/2010/05/20/exchange-web-services-ews-managed-api-ndash-part-2.aspx
-		final SearchFilter.SearchFilterCollection searchFilterCollection = new SearchFilter.SearchFilterCollection(LogicalOperator.Or);
+		// Take a look at http://blogs.planetsoftware.com
+		// .au/paul/archive/2010/05/20/exchange-web-services-ews-managed-api-ndash-part-2.aspx
+		final SearchFilter.SearchFilterCollection searchFilterCollection = new SearchFilter.SearchFilterCollection(
+				LogicalOperator.Or);
 		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "1")); // Flagged complete
 		searchFilterCollection.add(new SearchFilter.IsEqualTo(PR_FLAG_STATUS, "2")); // Flagged
 		final ItemView itemView = new ItemView(MAX_RESULTS);
@@ -147,11 +167,13 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 
 		final SearchFilter searchFilter1 = new SearchFilter.IsEqualTo(PR_ALL_FOLDERS, "2");
 		final SearchFilter searchFilter2 = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "allitems");
-		final SearchFilter.SearchFilterCollection searchFilterCollection = new SearchFilter.SearchFilterCollection(LogicalOperator.And);
+		final SearchFilter.SearchFilterCollection searchFilterCollection = new SearchFilter.SearchFilterCollection(
+				LogicalOperator.And);
 		searchFilterCollection.add(searchFilter1);
 		searchFilterCollection.add(searchFilter2);
 
-		final FindFoldersResults findFoldersResults = service.findFolders(rootFolderId, searchFilterCollection, folderView);
+		final FindFoldersResults findFoldersResults = service.findFolders(rootFolderId, searchFilterCollection,
+				folderView);
 
 		if (findFoldersResults.getFolders().size() == 0) {
 			return null;
@@ -159,13 +181,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		return findFoldersResults.getFolders().iterator().next();
 	}
 
-	public TaskDto convertToTaskDto(final EmailMessage email) throws ServiceLocalException {
+	private TaskDto convertToTaskDto(final EmailMessage email) throws ServiceLocalException {
 		Integer flagValue = null;
 		Date dueDate = null;
 		for (final ExtendedProperty extendedProperty : email.getExtendedProperties()) {
-			if (extendedProperty.getPropertyDefinition().getTag() != null && extendedProperty.getPropertyDefinition().getTag() == PID_TAG_FLAG_STATUS) {
+			if (extendedProperty.getPropertyDefinition().getTag() != null && extendedProperty.getPropertyDefinition()
+					.getTag() == PID_TAG_FLAG_STATUS) {
 				flagValue = (Integer) extendedProperty.getValue();
-			} else if (extendedProperty.getPropertyDefinition().getId() != null && extendedProperty.getPropertyDefinition().getId() == PID_LID_TASK_DUE_DATE) {
+			} else if (extendedProperty.getPropertyDefinition().getId() != null && extendedProperty
+					.getPropertyDefinition().getId() == PID_LID_TASK_DUE_DATE) {
 				dueDate = (Date) extendedProperty.getValue();
 			}
 		}
@@ -183,8 +207,8 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		task.setDueDate(convertToJodaDateTime(dueDate));
 		return task;
 	}
-	
-	public PersonDto convertToPersonDto(final EmailAddress email, final boolean optional) {
+
+	private PersonDto convertToPersonDto(final EmailAddress email, final boolean optional) {
 		final PersonDto person = new PersonDto();
 		person.setName(email.getName());
 		if (ROUTING_TYPE_SMTP.equals(email.getRoutingType())) {
@@ -194,7 +218,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		return person;
 	}
 
-	public AppointmentDto convertToAppointmentDto(final Appointment appointment) throws ServiceLocalException {
+	private AppointmentDto convertToAppointmentDto(final Appointment appointment) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(appointment.getId().getUniqueId());
 		appointmentDto.setLastModified(convertToJodaDateTime(appointment.getLastModifiedTime()));
@@ -239,7 +263,7 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		return appointmentDto;
 	}
 
-	public AppointmentDto convertToAppointmentDto(final MeetingRequest meeting) throws ServiceLocalException {
+	private AppointmentDto convertToAppointmentDto(final MeetingRequest meeting) throws ServiceLocalException {
 		final AppointmentDto appointmentDto = new AppointmentDto();
 		appointmentDto.setExchangeId(meeting.getId().getUniqueId());
 		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime()));
@@ -305,8 +329,10 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	}
 
 	private PropertySet createEmailPropertySet() {
-		final ExtendedPropertyDefinition[] extendedPropertyDefinitions = new ExtendedPropertyDefinition[] { PR_FLAG_STATUS, PR_TASK_DUE_DATE };
-		final PropertySet propertySet = new PropertySet(BasePropertySet.FirstClassProperties, extendedPropertyDefinitions);
+		final ExtendedPropertyDefinition[] extendedPropertyDefinitions = new
+				ExtendedPropertyDefinition[]{PR_FLAG_STATUS, PR_TASK_DUE_DATE};
+		final PropertySet propertySet = new PropertySet(BasePropertySet.FirstClassProperties,
+				extendedPropertyDefinitions);
 		return propertySet;
 	}
 
@@ -364,13 +390,14 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 	}
 
 	@Override
-	public Collection<AppointmentDto> getAllAppointments(final DateTime startDate, final DateTime endDate)
-			throws Exception {
+	public Collection<AppointmentDto> getAllAppointments(final DateTime startDate,
+			final DateTime endDate) throws Exception {
 		// Return a task for each calendar item
 		final Set<AppointmentDto> results = new HashSet<AppointmentDto>();
 		final CalendarView calendarView = new CalendarView(startDate.toDate(), endDate.toDate(), MAX_RESULTS);
 		calendarView.setPropertySet(createIdOnlyPropertySet());
-		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar, calendarView);
+		final FindItemsResults<Appointment> appointments = service.findAppointments(WellKnownFolderName.Calendar,
+				calendarView);
 		final Iterable<Item> items = new ArrayList<Item>(appointments.getItems());
 		service.loadPropertiesForItems(items, createCalendarPropertySet());
 		for (final Appointment appointment : appointments.getItems()) {
@@ -381,13 +408,15 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 			}
 			// Due to a bug in the EWS API, the code below throws an exception, so we can't handle recurring
 			// appointments properly.
-//			if (appointment.getAppointmentType() == AppointmentType.Occurrence) {
-//				RecurringAppointmentMasterId masterId = new RecurringAppointmentMasterId(appointment.getId().getUniqueId());
-//				Appointment masterAppointment = Appointment.bind(service, masterId, createCalendarPropertySet());
-//				results.add(convertToAppointmentDto(masterAppointment));
-//			} else if (appointment.getAppointmentType() == AppointmentType.Single) {
-//				results.add(convertToAppointmentDto(appointment));
-//			}
+			//			if (appointment.getAppointmentType() == AppointmentType.Occurrence) {
+			//				RecurringAppointmentMasterId masterId = new RecurringAppointmentMasterId(appointment.getId
+			// ().getUniqueId());
+			//				Appointment masterAppointment = Appointment.bind(service, masterId,
+			// createCalendarPropertySet());
+			//				results.add(convertToAppointmentDto(masterAppointment));
+			//			} else if (appointment.getAppointmentType() == AppointmentType.Single) {
+			//				results.add(convertToAppointmentDto(appointment));
+			//			}
 		}
 		return results;
 	}

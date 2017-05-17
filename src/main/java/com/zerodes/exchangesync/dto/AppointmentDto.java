@@ -6,6 +6,9 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
+/**
+ * A DTO class for holding appointment values.
+ */
 public class AppointmentDto {
 	private String exchangeId;
 	private DateTime lastModified;
@@ -20,55 +23,55 @@ public class AppointmentDto {
 	private Integer reminderMinutesBeforeStart;
 	private RecurrenceType recurrenceType;
 	private Integer recurrenceCount;
-	
+
 	public String getExchangeId() {
 		return exchangeId;
 	}
-	
+
 	public void setExchangeId(final String exchangeId) {
 		this.exchangeId = exchangeId;
 	}
-	
+
 	public DateTime getLastModified() {
 		return lastModified;
 	}
-	
+
 	public void setLastModified(final DateTime lastModified) {
 		this.lastModified = lastModified;
 	}
-	
+
 	public void setSummary(final String summary) {
 		this.summary = summary;
 	}
-	
+
 	public String getSummary() {
 		return summary;
 	}
-	
+
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public void setDescription(final String name) {
 		this.description = name;
 	}
-	
+
 	public void setStart(final DateTime start) {
 		this.start = start;
 	}
-	
+
 	public DateTime getStart() {
 		return start;
 	}
-	
+
 	public void setEnd(final DateTime end) {
 		this.end = end;
 	}
-	
+
 	public DateTime getEnd() {
 		return end;
 	}
-	
+
 	public boolean isAllDay() {
 		return allDay;
 	}
@@ -80,50 +83,55 @@ public class AppointmentDto {
 	public void setLocation(final String location) {
 		this.location = location;
 	}
+
 	public String getLocation() {
 		return location;
 	}
-	
+
 	public PersonDto getOrganizer() {
 		return organizer;
 	}
-	
+
 	public void setOrganizer(final PersonDto organizer) {
 		this.organizer = organizer;
 	}
-	
+
 	public Set<PersonDto> getAttendees() {
 		return attendees;
 	}
-	
+
 	public void setAttendees(final Set<PersonDto> attendees) {
 		this.attendees = attendees;
 	}
-	
+
 	public Integer getReminderMinutesBeforeStart() {
 		return reminderMinutesBeforeStart;
 	}
-	
+
 	public void setReminderMinutesBeforeStart(final Integer reminderMinutesBeforeStart) {
 		this.reminderMinutesBeforeStart = reminderMinutesBeforeStart;
 	}
-	
+
 	public RecurrenceType getRecurrenceType() {
 		return recurrenceType;
 	}
-	
+
 	public void setRecurrenceType(final RecurrenceType recurrenceType) {
 		this.recurrenceType = recurrenceType;
 	}
-	
+
 	public Integer getRecurrenceCount() {
 		return recurrenceCount;
 	}
-	
+
 	public void setRecurrenceCount(final Integer recurrenceCount) {
 		this.recurrenceCount = recurrenceCount;
 	}
-	
+
+	/**
+	 * Shallow copy this appointment to a destination appointment object.
+	 * @param dest the destination appointment object
+	 */
 	public void copyTo(final AppointmentDto dest) {
 		dest.exchangeId = exchangeId;
 		dest.lastModified = lastModified;
@@ -137,6 +145,9 @@ public class AppointmentDto {
 		dest.allDay = allDay;
 	}
 
+	/**
+	 * The type of recurrence.
+	 */
 	public enum RecurrenceType {
 		DAILY,
 		WEEKLY,
@@ -155,7 +166,7 @@ public class AppointmentDto {
 			.append(location)
 			.toHashCode();
 	}
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {

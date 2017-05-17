@@ -2,6 +2,9 @@ package com.zerodes.exchangesync.tasksource.rtm;
 
 import com.zerodes.exchangesync.dto.TaskDto;
 
+/**
+ * A TaskDto extension for holding Remember The Milk specific values.
+ */
 public class RtmTaskDto extends TaskDto {
 	private String rtmTaskId;
 	private String rtmTimeSeriesId;

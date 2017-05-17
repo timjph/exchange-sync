@@ -15,18 +15,27 @@ import com.zerodes.exchangesync.StatisticsCollector;
 import com.zerodes.exchangesync.calendarsource.CalendarSource;
 import com.zerodes.exchangesync.dto.AppointmentDto;
 
+/**
+ * Control class for pairing up matching appointments from two calendar data sources.
+ */
 public class SyncCalendarsImpl {
 	private static final Logger LOG = LoggerFactory.getLogger(SyncCalendarsImpl.class);
-	
+
 	private final CalendarSource exchangeSource;
 	private final CalendarSource otherSource;
 
+	/**
+	 * Constructor for instantiating SyncCalendarsImpl.
+	 *
+	 * @param exchangeSource the Exchange data source
+	 * @param otherSource the other data source
+	 */
 	public SyncCalendarsImpl(final CalendarSource exchangeSource, final CalendarSource otherSource) {
 		this.exchangeSource = exchangeSource;
 		this.otherSource = otherSource;
 	}
 
-	protected Set<Pair<AppointmentDto, AppointmentDto>> generatePairs(final int monthsToExport) throws Exception {
+	private Set<Pair<AppointmentDto, AppointmentDto>> generatePairs(final int monthsToExport) throws Exception {
 		final Set<Pair<AppointmentDto, AppointmentDto>> results = new HashSet<Pair<AppointmentDto, AppointmentDto>>();
 		// Set time frame to one month as temporary workaround for "Calendar usage limits exceeded." issue.
 		final DateTime now = new DateTime();
@@ -52,7 +61,10 @@ public class SyncCalendarsImpl {
 	 *
 	 * @param exchangeCalendarEntry Exchange CalendarEntry (or null if no matching CalendarEntry exists)
 	 * @param otherCalendarEntry CalendarEntry from "other" data source (or null if no matching CalendarEntry exists)
+	 * @param stats the statistics collector
+	 * @throws Exception if an error occurs
 	 */
+	@SuppressWarnings({"PMD.CollapsibleIfStatements"})
 	public void sync(final AppointmentDto exchangeCalendarEntry, final AppointmentDto otherCalendarEntry, final StatisticsCollector stats)
 			throws Exception {
 		if (exchangeCalendarEntry != null && otherCalendarEntry == null) {
@@ -67,18 +79,23 @@ public class SyncCalendarsImpl {
 				exchangeCalendarEntry.copyTo(otherCalendarEntry);
 				otherSource.updateAppointment(otherCalendarEntry);
 				stats.appointmentUpdated();
-			} else {
-				// Other CalendarEntry has a more recent modified date, so modify Exchange
 			}
 		}
 	}
 
+	/**
+	 * Synchronize all appointments from the Exchange data source to the other data source.
+	 *
+	 * @param stats the statistics collector
+	 * @param monthsToExport the number of months in the future to export
+	 * @return true if the operation was successful
+	 */
 	public boolean syncAll(final StatisticsCollector stats, final int monthsToExport) {
 		LOG.info("Synchronizing calendars...");
 
 		// Generate matching pairs of appointments
 		try {
-			final Set<Pair<AppointmentDto, AppointmentDto>>pairs = generatePairs(monthsToExport);
+			final Set<Pair<AppointmentDto, AppointmentDto>> pairs = generatePairs(monthsToExport);
 
 			// Create/complete/delete as required
 			for (final Pair<AppointmentDto, AppointmentDto> pair : pairs) {
@@ -91,7 +108,7 @@ public class SyncCalendarsImpl {
 		return false;
 	}
 
-	public Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> calendarEntrys) {
+	private Map<String, AppointmentDto> generateExchangeIdMap(final Collection<AppointmentDto> calendarEntrys) {
 		final Map<String, AppointmentDto> results = new HashMap<String, AppointmentDto>();
 		for (final AppointmentDto calendarEntry : calendarEntrys) {
 			results.put(calendarEntry.getExchangeId(), calendarEntry);

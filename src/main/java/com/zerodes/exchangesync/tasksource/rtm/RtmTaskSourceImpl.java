@@ -31,9 +31,12 @@ import com.zerodes.exchangesync.dto.TaskDto;
 import com.zerodes.exchangesync.settings.Settings;
 import com.zerodes.exchangesync.tasksource.TaskSource;
 
+/**
+ * A Task data source implementation for Remember The Milk.
+ */
 public class RtmTaskSourceImpl implements TaskSource {
 	private static final Logger LOG = LoggerFactory.getLogger(RtmTaskSourceImpl.class);
-	
+
 	private static final String RTM_API_KEY = "0bcf4c7e3182ec34f45321512e576300";
 	private static final String RTM_SHARED_SECRET = "fbf7a0bdb0011532";
 
@@ -43,32 +46,44 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	private static final String EXCHANGE_ID_NOTE_TITLE = "ExchangeID";
 	private static final String ORIGINAL_SUBJECT_NOTE_TITLE = "Original Email Subject";
-	
+
 	private static final String INTERNAL_SETTING_FROB = "frob";
 	private static final String INTERNAL_SETTING_AUTH_TOKEN = "authToken";
 
 	private Settings settings;
 	private final String defaultRtmListId;
 
+	/**
+	 * Possible status results from a Remember the Milk authentication request.
+	 */
 	private enum RtmAuthStatus {
 		NEEDS_USER_APPROVAL,
 		NEEDS_AUTH_TOKEN,
 		AUTHORIZED
 	}
 
+	/**
+	 * Constructor for instantiating an RtmTaskSourceImpl.
+	 *
+	 * @param settings the application settings
+	 * @throws RtmServerException if an error occurs
+	 */
 	public RtmTaskSourceImpl(final Settings settings) throws RtmServerException {
 		this.settings = settings;
 		LOG.info("Connecting to Remember The Milk...");
 		switch (getAuthStatus()) {
-		case NEEDS_USER_APPROVAL:
-			throw new RuntimeException("Please go to the following URL to authorize application to sync with Remember The Milk: "
-					+ getAuthenticationUrl("write"));
-		case NEEDS_AUTH_TOKEN:
-			completeAuthentication();
+			case NEEDS_USER_APPROVAL:
+				throw new RuntimeException("Please go to the following URL to authorize application to sync with Remember The Milk: "
+						+ getAuthenticationUrl("write"));
+			case NEEDS_AUTH_TOKEN:
+				completeAuthentication();
+				break;
+			default:
+				// Fall through
 		}
 		this.defaultRtmListId = getIdForListName(settings.getUserSettings().rtmListName());
 	}
-	
+
 	@Override
 	public void addTask(final TaskDto task) throws Exception {
 		// Add email tag
@@ -140,7 +155,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 		}
 	}
 
-	public void completeAuthentication() throws RtmServerException {
+	private void completeAuthentication() throws RtmServerException {
 		if (settings.getInternalSetting(INTERNAL_SETTING_FROB) == null) {
 			throw new RuntimeException("Unable to complete authentication unless in NEEDS_AUTH_TOKEN status.");
 		}
@@ -194,7 +209,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	/**
 	 * Add a new task.
-	 * 
+	 *
 	 * @param timelineId
 	 * @param listId
 	 * @param task
@@ -207,7 +222,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 			addTaskParams.put("list_id", listId);
 			addTaskParams.put("name", task.getName());
 			final Document response = parseXML(getRtmMethodUri("rtm.tasks.add", addTaskParams));
-			
+
 			final RtmTaskDto rtmTask = new RtmTaskDto();
 			task.copyTo(rtmTask);
 			final Node idNode = response.selectSingleNode("/rsp/list/taskseries/task/@id");
@@ -215,22 +230,22 @@ public class RtmTaskSourceImpl implements TaskSource {
 			final Node taskSeriesIdNode = response.selectSingleNode("/rsp/list/taskseries/@id");
 			rtmTask.setRtmTimeSeriesId(taskSeriesIdNode.getText());
 			rtmTask.setRtmListId(listId);
-			
+
 			// Set due date (if required)
 			if (rtmTask.getDueDate() != null) {
 				updateDueDate(timelineId, rtmTask);
 			}
-			
+
 			// Set completed (if required)
 			if (rtmTask.isCompleted()) {
 				updateCompleteFlag(timelineId, rtmTask);
 			}
-			
+
 			// Add tags (if required)
 			if (!rtmTask.getTags().isEmpty()) {
 				addTags(timelineId, rtmTask, rtmTask.getTags());
 			}
-			
+
 			// Add notes (if required)
 			if (!rtmTask.getNotes().isEmpty()) {
 				for (final NoteDto note : rtmTask.getNotes()) {
@@ -244,7 +259,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	/**
 	 * Update a task's due date.
-	 * 
+	 *
 	 * @param timelineId
 	 * @param task
 	 * @throws RtmServerException
@@ -262,27 +277,8 @@ public class RtmTaskSourceImpl implements TaskSource {
 	}
 
 	/**
-	 * Update a task's url.
-	 * 
-	 * @param timelineId
-	 * @param task
-	 * @throws RtmServerException
-	 * @throws UnsupportedEncodingException
-	 */
-	private void updateUrl(final String timelineId, final RtmTaskDto task)
-			throws RtmServerException, UnsupportedEncodingException {
-		final TreeMap<String, String> setUrlParams = new TreeMap<String, String>();
-		setUrlParams.put("task_id", task.getRtmTaskId());
-		setUrlParams.put("taskseries_id", task.getRtmTimeSeriesId());
-		setUrlParams.put("timeline", timelineId);
-		setUrlParams.put("list_id", task.getRtmListId());
-		setUrlParams.put("url", task.getUrl());
-		parseXML(getRtmMethodUri("rtm.tasks.setURL", setUrlParams));
-	}
-
-	/**
 	 * Add tags to a task.
-	 * 
+	 *
 	 * @param timelineId
 	 * @param task
 	 * @throws RtmServerException
@@ -301,7 +297,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	/**
 	 * Add a note to a task.
-	 * 
+	 *
 	 * @param timelineId
 	 * @param task
 	 * @throws RtmServerException
@@ -321,7 +317,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 
 	/**
 	 * Mark a task as completed or incomplete.
-	 * 
+	 *
 	 * @param timelineId
 	 * @param task
 	 * @throws RtmServerException
@@ -430,12 +426,10 @@ public class RtmTaskSourceImpl implements TaskSource {
 		try {
 			response = reader.read(uri.toURL());
 			final Node status = response.selectSingleNode("/rsp/@stat");
-			if (status != null) {
-				if (status.getText().equals("fail")) {
-					final Node errCode = response.selectSingleNode("/rsp/err/@code");
-					final Node errMessage = response.selectSingleNode("/rsp/err/@msg");
-					throw new RtmServerException(Integer.valueOf(errCode.getText()), errMessage.getText());
-				}
+			if (status != null && status.getText().equals("fail")) {
+				final Node errCode = response.selectSingleNode("/rsp/err/@code");
+				final Node errMessage = response.selectSingleNode("/rsp/err/@msg");
+				throw new RtmServerException(Integer.valueOf(errCode.getText()), errMessage.getText());
 			}
 			return response;
 		} catch (final MalformedURLException e) {
@@ -462,7 +456,7 @@ public class RtmTaskSourceImpl implements TaskSource {
 			throw new RuntimeException("Unable to create API signature", e);
 		}
 	}
-	
+
 	private String convertJodaDateTimeToString(final DateTime theDate) {
 		final DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
 		return fmt.print(theDate) + "T23:59:59Z";

@@ -30,7 +30,7 @@ public interface UserSettings extends Config {
 	/**
 	 * Determines whether to synchronize the organizer and attendees for calendar appointments.
 	 * Some users have reported that disabling this resolves the "Calendar usage limits exceeded" issue.
-	 * @return
+	 * @return whether to synchronize the organizer and attendees
 	 */
 	@DefaultValue("true")
 	boolean googleSyncOrganizerAndAttendees();
@@ -119,6 +119,7 @@ public interface UserSettings extends Config {
 
 	/**
 	 * Number of months in the future to export to Google Calendar.
+	 * @return the number of months in the future to export
 	 */
 	@DefaultValue("1")
 	int appointmentMonthsToExport();

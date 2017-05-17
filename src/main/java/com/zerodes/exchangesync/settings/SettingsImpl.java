@@ -12,11 +12,21 @@ import com.zerodes.exchangesync.exchange.ExchangeSettings;
 import com.zerodes.exchangesync.exchange.ExchangeSettingsImpl;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Holder of all application settings.
+ */
 public class SettingsImpl implements Settings {
+	private static final Logger LOG = LoggerFactory.getLogger(SettingsImpl.class);
+
 	private final UserSettings userSettings;
 	private final Properties internalSettings;
-	
+
+	/**
+	 * Constructor for instantiating SettingsImpl.
+	 */
 	public SettingsImpl() {
 		userSettings = ConfigFactory.create(UserSettings.class);
 		internalSettings = new Properties();
@@ -26,9 +36,11 @@ public class SettingsImpl implements Settings {
 			internalSettingsStream.close();
 		} catch (final IOException e) {
 			// Do nothing, just use defaults
+			LOG.debug("Unable to load internal.properties. It might not exist yet.");
 		}
 	}
-	
+
+	@Override
 	public void save() {
 		try {
 			final OutputStream internalSettingsStream = new FileOutputStream("internal.properties");

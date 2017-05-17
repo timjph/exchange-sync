@@ -45,6 +45,9 @@ import com.zerodes.exchangesync.dto.AppointmentDto.RecurrenceType;
 import com.zerodes.exchangesync.dto.PersonDto;
 import com.zerodes.exchangesync.settings.Settings;
 
+/**
+ * A Calendar data source implementation for Google Calendars.
+ */
 public class GoogleCalendarSourceImpl implements CalendarSource {
 	private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarSourceImpl.class);
 
@@ -73,6 +76,11 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 
 	private final boolean syncOrganizerAndAttendees;
 
+	/**
+	 * Constructor for instantiating the Google Calendars data source.
+	 * @param settings the application settings
+	 * @throws Exception if an error occurs
+	 */
 	public GoogleCalendarSourceImpl(final Settings settings) throws Exception {
 		if (settings.getUserSettings().needInternetProxy()) {
 			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(settings.getUserSettings().internetProxyHost(), settings
@@ -91,7 +99,9 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		LOG.info("Connected to Google Calendar.");
 	}
 
-	/** Authorizes the installed application to access user's protected data. */
+	/**
+	 * Authorizes the installed application to access user's protected data.
+	 */
 	private Credential authorize() throws Exception {
 		// load client secrets
 		GoogleClientSecrets clientSecrets = GoogleClientSecrets
@@ -288,7 +298,8 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 		return new DateTime(true, date.getMillis() + tzShift, null);
 	}
 
-	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay, final DateTimeZone calendarTimeZone) {
+	private static EventDateTime convertToEventDateTime(final org.joda.time.DateTime date, final boolean isAllDay,
+			final DateTimeZone calendarTimeZone) {
 		final EventDateTime result = new EventDateTime();
 		if (isAllDay) {
 			result.setDate(convertToDate(date, calendarTimeZone.getOffset(date.getMillis())));

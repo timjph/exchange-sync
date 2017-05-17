@@ -7,6 +7,9 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
+/**
+ * A DTO class for holding task values.
+ */
 public class TaskDto {
 	private String exchangeId;
 	private DateTime lastModified;
@@ -17,7 +20,7 @@ public class TaskDto {
 	private boolean completed;
 	private Set<String> tags = new HashSet<String>();
 	private Set<NoteDto> notes = new HashSet<NoteDto>();
-	
+
 	public String getExchangeId() {
 		return exchangeId;
 	}
@@ -25,7 +28,7 @@ public class TaskDto {
 	public void setExchangeId(final String exchangeId) {
 		this.exchangeId = exchangeId;
 	}
-	
+
 	public DateTime getLastModified() {
 		return lastModified;
 	}
@@ -37,27 +40,27 @@ public class TaskDto {
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(final String name) {
 		this.name = name;
 	}
-	
+
 	public DateTime getDueDate() {
 		return dueDate;
 	}
-	
+
 	public void setDueDate(final DateTime dueDate) {
 		this.dueDate = dueDate;
 	}
-	
+
 	public Byte getPriority() {
 		return priority;
 	}
-	
+
 	public void setPriority(final Byte priority) {
 		this.priority = priority;
 	}
-	
+
 	public String getUrl() {
 		return url;
 	}
@@ -78,6 +81,10 @@ public class TaskDto {
 		return tags;
 	}
 
+	/**
+	 * Add a tag to the task.
+	 * @param tag the tag value
+	 */
 	public void addTag(final String tag) {
 		tags.add(tag);
 	}
@@ -86,10 +93,18 @@ public class TaskDto {
 		return notes;
 	}
 
+	/**
+	 * Add a note to the task.
+	 * @param note the note DTO object
+	 */
 	public void addNote(final NoteDto note) {
 		notes.add(note);
 	}
-	
+
+	/**
+	 * Shallow copy a task to a destination task object.
+	 * @param dest the destination task object
+	 */
 	public void copyTo(final TaskDto dest) {
 		dest.exchangeId = exchangeId;
 		dest.lastModified = lastModified;

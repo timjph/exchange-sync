@@ -15,18 +15,27 @@ import com.zerodes.exchangesync.StatisticsCollector;
 import com.zerodes.exchangesync.dto.TaskDto;
 import com.zerodes.exchangesync.tasksource.TaskSource;
 
+/**
+ * Control class for pairing up matching tasks from two task data sources.
+ */
 public class SyncTasksImpl {
 	private static final Logger LOG = LoggerFactory.getLogger(SyncTasksImpl.class);
 
 	private final TaskSource exchangeSource;
 	private final TaskSource otherSource;
 
+	/**
+	 * Constructor for instantiating SyncTasksImpl.
+	 *
+	 * @param exchangeSource the Exchange data source
+	 * @param otherSource the other data source
+	 */
 	public SyncTasksImpl(final TaskSource exchangeSource, final TaskSource otherSource) {
 		this.exchangeSource = exchangeSource;
 		this.otherSource = otherSource;
 	}
 
-	protected Set<Pair<TaskDto, TaskDto>> generatePairs() throws Exception {
+	private Set<Pair<TaskDto, TaskDto>> generatePairs() throws Exception {
 		final Set<Pair<TaskDto, TaskDto>> results = new HashSet<Pair<TaskDto, TaskDto>>();
 		final Collection<TaskDto> otherTasks = otherSource.getAllTasks();
 		final Collection<TaskDto> exchangeTasks = exchangeSource.getAllTasks();
@@ -48,7 +57,10 @@ public class SyncTasksImpl {
 	 *
 	 * @param exchangeTask Exchange task (or null if no matching task exists)
 	 * @param otherTask Task from "other" data source (or null if no matching task exists)
+	 * @param stats the statistics collector
+	 * @throws Exception if an error occurs
 	 */
+	@SuppressWarnings({"PMD.CollapsibleIfStatements"})
 	public void sync(final TaskDto exchangeTask, final TaskDto otherTask, final StatisticsCollector stats)
 			throws Exception {
 		if (exchangeTask != null && !exchangeTask.isCompleted() && otherTask == null) {
@@ -74,12 +86,16 @@ public class SyncTasksImpl {
 					otherSource.updateDueDate(otherTask);
 					stats.taskUpdated();
 				}
-			} else {
-				// Other task has a more recent modified date, so modify Exchange
 			}
 		}
 	}
 
+	/**
+	 * Synchronize all tasks from the Exchange data source to the other data source.
+	 *
+	 * @param stats the statistics collector
+	 * @return true if the operation was successful
+	 */
 	public boolean syncAll(final StatisticsCollector stats) {
 		LOG.info("Synchronizing tasks...");
 
@@ -97,7 +113,7 @@ public class SyncTasksImpl {
 		return false;
 	}
 
-	public Map<String, TaskDto> generateExchangeIdMap(final Collection<TaskDto> tasks) {
+	private Map<String, TaskDto> generateExchangeIdMap(final Collection<TaskDto> tasks) {
 		final Map<String, TaskDto> results = new HashMap<String, TaskDto>();
 		for (final TaskDto task : tasks) {
 			results.put(task.getExchangeId(), task);
