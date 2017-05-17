@@ -239,51 +239,6 @@ public class ExchangeSourceImpl implements TaskSource, CalendarSource {
 		return appointmentDto;
 	}
 
-	public AppointmentDto convertToAppointmentDto(final MeetingRequest meeting) throws ServiceLocalException {
-		final AppointmentDto appointmentDto = new AppointmentDto();
-		appointmentDto.setExchangeId(meeting.getId().getUniqueId());
-		appointmentDto.setLastModified(convertToJodaDateTime(meeting.getLastModifiedTime()));
-		appointmentDto.setSummary(meeting.getSubject());
-		try {
-			appointmentDto.setDescription(MessageBody.getStringFromMessageBody(meeting.getBody()));
-		} catch (final Exception e) {
-			LOG.error("Unable to retrieve appointment body from Exchange", e);
-		}
-		appointmentDto.setStart(convertToJodaDateTime(meeting.getStart()));
-		appointmentDto.setEnd(convertToJodaDateTime(meeting.getEnd()));
-		appointmentDto.setAllDay(meeting.getIsAllDayEvent());
-		appointmentDto.setLocation(meeting.getLocation());
-		if (meeting.getOrganizer() != null) {
-			appointmentDto.setOrganizer(convertToPersonDto(meeting.getOrganizer(), false));
-		}
-		final Set<PersonDto> attendees = new HashSet<PersonDto>();
-		if (meeting.getRequiredAttendees() != null) {
-			for (final Attendee exchangeAttendee : meeting.getRequiredAttendees()) {
-				attendees.add(convertToPersonDto(exchangeAttendee, false));
-			}
-		}
-		if (meeting.getOptionalAttendees() != null) {
-			for (final Attendee exchangeAttendee : meeting.getOptionalAttendees()) {
-				attendees.add(convertToPersonDto(exchangeAttendee, true));
-			}
-		}
-		appointmentDto.setAttendees(attendees);
-		appointmentDto.setReminderMinutesBeforeStart(meeting.getReminderMinutesBeforeStart());
-		if (meeting.getRecurrence() != null) {
-			if (meeting.getRecurrence() instanceof Recurrence.DailyPattern) {
-				appointmentDto.setRecurrenceType(RecurrenceType.DAILY);
-			} else if (meeting.getRecurrence() instanceof Recurrence.WeeklyPattern) {
-				appointmentDto.setRecurrenceType(RecurrenceType.WEEKLY);
-			} else if (meeting.getRecurrence() instanceof Recurrence.MonthlyPattern) {
-				appointmentDto.setRecurrenceType(RecurrenceType.MONTHLY);
-			} else if (meeting.getRecurrence() instanceof Recurrence.YearlyPattern) {
-				appointmentDto.setRecurrenceType(RecurrenceType.YEARLY);
-			}
-			appointmentDto.setRecurrenceCount(meeting.getRecurrence().getNumberOfOccurrences());
-		}
-		return appointmentDto;
-	}
-
 	/**
 	 * Convert EWS dates to Joda time DateTime objects.
 	 *
