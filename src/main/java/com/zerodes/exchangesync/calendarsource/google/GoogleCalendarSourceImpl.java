@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,9 +220,10 @@ public class GoogleCalendarSourceImpl implements CalendarSource {
 				event.setOrganizer(organizer);
 			}
 			if (appointmentDto.getAttendees() != null) {
+				EmailValidator emailValidator = EmailValidator.getInstance();
 				final List<EventAttendee> attendees = new ArrayList<EventAttendee>();
 				for (final PersonDto attendee : appointmentDto.getAttendees()) {
-					if (attendee.getEmail() != null) {
+					if (emailValidator.isValid(attendee.getEmail())) {
 						final EventAttendee eventAttendee = new EventAttendee();
 						eventAttendee.setDisplayName(attendee.getName());
 						eventAttendee.setEmail(obfuscateEmail(attendee.getEmail()));
