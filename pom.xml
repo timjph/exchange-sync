@@ -114,8 +114,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.aeonbits.owner</groupId>
-			<artifactId>owner</artifactId>
-			<version>1.0.5</version>
+			<artifactId>owner-java8</artifactId>
+			<version>1.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>
@@ -198,6 +198,14 @@
 				<version>1.2.1</version>
 				<configuration>
 					<mainClass>com.zerodes.exchangesync.App</mainClass>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
